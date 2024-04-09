@@ -1,0 +1,14 @@
+{
+  "name": "inferno-2d-shareware",
+  "version": "1.0.0",
+  "description": "A 2D Platformer Tribute to 90s Descent",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nick Derevjanik",
+  "license": "GPL-3.0-only",
+  "devDependencies": {
+    "typescript": "^5.4.4"
+  }
+}
