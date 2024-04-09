@@ -25,7 +25,7 @@ let pointerText: Text;
 
 function init(this: Scene) {
   this.input.keyboard.addKey("r").on("down", handleRestart.bind(this));
-  this.input.keyboard.addKey("d").on("down", () => (debugging = true));
+  this.input.keyboard.addKey("d").on("down", () => (debugging = !debugging));
 }
 
 function preload(this: Scene) {
