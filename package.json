@@ -6,9 +6,10 @@
   "scripts": {
     "clean": "rimraf dist",
     "format": "prettier . --check",
+    "lint": "eslint .",
     "compile": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm-run-all clean format compile --print-label",
+    "build": "npm-run-all clean format lint compile --print-label",
     "watch": "webpack --watch",
     "serve": "webpack-dev-server",
     "start": "npm-run-all build --parallel watch serve --print-label"
@@ -16,6 +17,8 @@
   "author": "Nick Derevjanik",
   "license": "GPL-3.0-only",
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^8.57.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.6.0",
     "npm-run-all": "^4.1.5",
@@ -23,6 +26,7 @@
     "rimraf": "^5.0.5",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.4",
+    "typescript-eslint": "^7.6.0",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4"
