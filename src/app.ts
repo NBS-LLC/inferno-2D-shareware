@@ -25,7 +25,10 @@ let pointerText: Text;
 
 function init(this: Scene) {
   this.input.keyboard.addKey("esc").on("down", handleRestart.bind(this));
-  this.input.keyboard.addKey("backtick").on("down", () => (debugging = !debugging));
+
+  this.input.keyboard
+    .addKey("backtick")
+    .on("down", () => (debugging = !debugging));
 }
 
 function preload(this: Scene) {
@@ -40,7 +43,7 @@ function create(this: Scene) {
     bgGradient[1],
     bgGradient[2],
     bgGradient[3],
-    1
+    1,
   );
   background.fillRect(0, 0, 800, 600);
 
