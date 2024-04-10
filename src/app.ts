@@ -24,8 +24,8 @@ let fpsText: Text;
 let pointerText: Text;
 
 function init(this: Scene) {
-  this.input.keyboard.addKey("r").on("down", handleRestart.bind(this));
-  this.input.keyboard.addKey("d").on("down", () => (debugging = !debugging));
+  this.input.keyboard.addKey("esc").on("down", handleRestart.bind(this));
+  this.input.keyboard.addKey("backtick").on("down", () => (debugging = !debugging));
 }
 
 function preload(this: Scene) {
