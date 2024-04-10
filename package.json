@@ -2,7 +2,7 @@
   "name": "inferno-2d-shareware",
   "version": "1.0.0",
   "description": "A 2D Platformer Tribute to 90s Descent",
-  "main": "index.js",
+  "private": true,
   "scripts": {
     "clean": "rimraf dist",
     "format": "prettier . --check",
