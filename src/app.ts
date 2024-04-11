@@ -1,7 +1,7 @@
 import { Game, Scene } from "phaser";
 
 import GameConfig = Phaser.Types.Core.GameConfig;
-import Polygon = Phaser.GameObjects.Polygon;
+import DynamicBody = Phaser.Physics.Arcade.Body;
 import CursorKeys = Phaser.Types.Input.Keyboard.CursorKeys;
 import Color = Phaser.Display.Color;
 import Text = Phaser.GameObjects.Text;
@@ -23,7 +23,7 @@ const config: GameConfig = {
 
 const game = new Game(config);
 let debugging: boolean = false;
-let player: Polygon;
+let player: DynamicBody;
 let playerInput: CursorKeys;
 let fpsText: Text;
 let pointerText: Text;
@@ -54,38 +54,33 @@ function create(this: Scene) {
   );
   background.fillRect(0, 0, 800, 600);
 
-  player = this.add.polygon(
+  const playerShape = this.add.polygon(
     100,
     400,
     getPlayerVertices(),
     Color.GetColor(110, 110, 110),
   );
 
-  this.physics.add.existing(player);
-
-  if (player.body instanceof Phaser.Physics.Arcade.Body) {
-    player.body.setCollideWorldBounds(true);
-  }
+  player = this.physics.add.existing(playerShape).body as DynamicBody;
+  player.setCollideWorldBounds(true);
 
   fpsText = this.add.text(16, 32, "", { fontSize: "16px", color: "#FFF" });
   pointerText = this.add.text(16, 48, "", { fontSize: "16px", color: "#FFF" });
 }
 
 function update(this: Scene) {
-  if (player.body instanceof Phaser.Physics.Arcade.Body) {
-    player.body.setVelocity(0);
+  player.setVelocity(0);
 
-    if (playerInput.left.isDown) {
-      player.body.setVelocityX(-300);
-    } else if (playerInput.right.isDown) {
-      player.body.setVelocityX(300);
-    }
+  if (playerInput.left.isDown) {
+    player.setVelocityX(-300);
+  } else if (playerInput.right.isDown) {
+    player.setVelocityX(300);
+  }
 
-    if (playerInput.up.isDown) {
-      player.body.setVelocityY(-300);
-    } else if (playerInput.down.isDown) {
-      player.body.setVelocityY(300);
-    }
+  if (playerInput.up.isDown) {
+    player.setVelocityY(-300);
+  } else if (playerInput.down.isDown) {
+    player.setVelocityY(300);
   }
 
   fpsText.setText(debugging ? getFPSDetails() : "");
