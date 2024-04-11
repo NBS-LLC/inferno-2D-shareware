@@ -2,7 +2,7 @@ import { Game, Scene } from "phaser";
 
 import GameConfig = Phaser.Types.Core.GameConfig;
 import DynamicBody = Phaser.Physics.Arcade.Body;
-import CursorKeys = Phaser.Types.Input.Keyboard.CursorKeys;
+import Key = Phaser.Input.Keyboard.Key;
 import Color = Phaser.Display.Color;
 import Text = Phaser.GameObjects.Text;
 
@@ -24,7 +24,7 @@ const config: GameConfig = {
 const game = new Game(config);
 let debugging: boolean = false;
 let player: DynamicBody;
-let playerInput: CursorKeys;
+let playerInput: { [key: string]: Key } = {};
 let fpsText: Text;
 let pointerText: Text;
 
@@ -34,8 +34,6 @@ function init(this: Scene) {
   this.input.keyboard
     .addKey("backtick")
     .on("down", () => (debugging = !debugging));
-
-  playerInput = this.input.keyboard.createCursorKeys();
 }
 
 function preload(this: Scene) {
@@ -64,6 +62,11 @@ function create(this: Scene) {
   player = this.physics.add.existing(playerShape).body as DynamicBody;
   player.setCollideWorldBounds(true);
 
+  playerInput["left"] = this.input.keyboard.addKey("left");
+  playerInput["right"] = this.input.keyboard.addKey("right");
+  playerInput["up"] = this.input.keyboard.addKey("up");
+  playerInput["down"] = this.input.keyboard.addKey("down");
+
   fpsText = this.add.text(16, 32, "", { fontSize: "16px", color: "#FFF" });
   pointerText = this.add.text(16, 48, "", { fontSize: "16px", color: "#FFF" });
 }
@@ -71,15 +74,15 @@ function create(this: Scene) {
 function update(this: Scene) {
   player.setVelocity(0);
 
-  if (playerInput.left.isDown) {
+  if (playerInput["left"].isDown) {
     player.setVelocityX(-300);
-  } else if (playerInput.right.isDown) {
+  } else if (playerInput["right"].isDown) {
     player.setVelocityX(300);
   }
 
-  if (playerInput.up.isDown) {
+  if (playerInput["up"].isDown) {
     player.setVelocityY(-300);
-  } else if (playerInput.down.isDown) {
+  } else if (playerInput["down"].isDown) {
     player.setVelocityY(300);
   }
 
