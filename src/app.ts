@@ -62,10 +62,13 @@ function create(this: Scene) {
   player = this.physics.add.existing(playerShape).body as DynamicBody;
   player.setCollideWorldBounds(true);
 
-  playerInput["left"] = this.input.keyboard.addKey("left");
   playerInput["right"] = this.input.keyboard.addKey("right");
+  playerInput["left"] = this.input.keyboard.addKey("left");
   playerInput["up"] = this.input.keyboard.addKey("up");
   playerInput["down"] = this.input.keyboard.addKey("down");
+
+  playerInput["face-left"] = this.input.keyboard.addKey("A");
+  playerInput["face-right"] = this.input.keyboard.addKey("D");
 
   fpsText = this.add.text(16, 32, "", { fontSize: "16px", color: "#FFF" });
   pointerText = this.add.text(16, 48, "", { fontSize: "16px", color: "#FFF" });
@@ -74,12 +77,12 @@ function create(this: Scene) {
 function update(this: Scene) {
   player.setVelocity(0);
 
-  if (playerInput["left"].isDown) {
-    player.setVelocityX(-300);
-  }
-
   if (playerInput["right"].isDown) {
     player.setVelocityX(300);
+  }
+
+  if (playerInput["left"].isDown) {
+    player.setVelocityX(-300);
   }
 
   if (playerInput["up"].isDown) {
@@ -88,6 +91,16 @@ function update(this: Scene) {
 
   if (playerInput["down"].isDown) {
     player.setVelocityY(300);
+  }
+
+  if (playerInput["face-left"].isDown) {
+    const shape = player.gameObject as Phaser.GameObjects.Polygon;
+    shape.setAngle(180);
+  }
+
+  if (playerInput["face-right"].isDown) {
+    const shape = player.gameObject as Phaser.GameObjects.Polygon;
+    shape.setAngle(0);
   }
 
   fpsText.setText(debugging ? getFPSDetails() : "");
