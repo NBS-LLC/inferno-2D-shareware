@@ -24,7 +24,7 @@ const config: GameConfig = {
 const game = new Game(config);
 let debugging: boolean = false;
 let player: DynamicBody;
-let playerInput: { [key: string]: Key } = {};
+const playerInput: { [key: string]: Key } = {};
 let fpsText: Text;
 let pointerText: Text;
 
@@ -76,13 +76,17 @@ function update(this: Scene) {
 
   if (playerInput["left"].isDown) {
     player.setVelocityX(-300);
-  } else if (playerInput["right"].isDown) {
+  }
+
+  if (playerInput["right"].isDown) {
     player.setVelocityX(300);
   }
 
   if (playerInput["up"].isDown) {
     player.setVelocityY(-300);
-  } else if (playerInput["down"].isDown) {
+  }
+
+  if (playerInput["down"].isDown) {
     player.setVelocityY(300);
   }
 
