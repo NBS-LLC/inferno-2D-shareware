@@ -62,10 +62,10 @@ function create(this: Scene) {
   player = this.physics.add.existing(playerShape).body as DynamicBody;
   player.setCollideWorldBounds(true);
 
-  playerInput["right"] = this.input.keyboard.addKey("right");
-  playerInput["left"] = this.input.keyboard.addKey("left");
-  playerInput["up"] = this.input.keyboard.addKey("up");
-  playerInput["down"] = this.input.keyboard.addKey("down");
+  playerInput["right"] = this.input.keyboard.addKey("RIGHT");
+  playerInput["left"] = this.input.keyboard.addKey("LEFT");
+  playerInput["up"] = this.input.keyboard.addKey("UP");
+  playerInput["down"] = this.input.keyboard.addKey("DOWN");
 
   playerInput["face-left"] = this.input.keyboard.addKey("A");
   playerInput["face-right"] = this.input.keyboard.addKey("D");
