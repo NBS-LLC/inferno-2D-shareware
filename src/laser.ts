@@ -45,8 +45,12 @@ class Laser extends Phaser.GameObjects.Line {
       0,
       10,
       0,
-      Phaser.Display.Color.GetColor(66, 135, 245),
+      Phaser.Display.Color.GetColor(255, 255, 255),
     );
+
+    this.setLineWidth(2, 1);
+    this.postFX.addGlow(Phaser.Display.Color.GetColor(201, 232, 255), 4);
+
     scene.physics.add.existing(this);
   }
 
