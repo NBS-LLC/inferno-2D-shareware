@@ -26,6 +26,7 @@ const game = new Game(config);
 let debugging: boolean = false;
 let player: DynamicBody;
 const playerInput: { [key: string]: Key } = {};
+let isFacingLeft: boolean = false;
 let laserGroup: LaserGroup;
 let fpsText: Text;
 let pointerText: Text;
@@ -102,15 +103,21 @@ function update(this: Scene) {
   if (playerInput["face-left"].isDown) {
     const shape = player.gameObject as Phaser.GameObjects.Polygon;
     shape.setAngle(180);
+    isFacingLeft = true;
   }
 
   if (playerInput["face-right"].isDown) {
     const shape = player.gameObject as Phaser.GameObjects.Polygon;
     shape.setAngle(0);
+    isFacingLeft = false;
   }
 
   if (playerInput["primary-fire"].isDown) {
-    laserGroup.fireLaser(player.x + 45, player.y + 10);
+    if (isFacingLeft) {
+      laserGroup.fireLaser(player.x - 5, player.y + 10, isFacingLeft);
+    } else {
+      laserGroup.fireLaser(player.x + 45, player.y + 10, isFacingLeft);
+    }
   }
 
   fpsText.setText(debugging ? getFPSDetails() : "");
