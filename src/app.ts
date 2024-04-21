@@ -1,4 +1,5 @@
 import { Game, Scene } from "phaser";
+import { LaserGroup } from "./laser";
 
 import GameConfig = Phaser.Types.Core.GameConfig;
 import DynamicBody = Phaser.Physics.Arcade.Body;
@@ -25,6 +26,8 @@ const game = new Game(config);
 let debugging: boolean = false;
 let player: DynamicBody;
 const playerInput: { [key: string]: Key } = {};
+let isFacingLeft: boolean = false;
+let laserGroup: LaserGroup;
 let fpsText: Text;
 let pointerText: Text;
 
@@ -62,6 +65,8 @@ function create(this: Scene) {
   player = this.physics.add.existing(playerShape).body as DynamicBody;
   player.setCollideWorldBounds(true);
 
+  laserGroup = new LaserGroup(this);
+
   playerInput["right"] = this.input.keyboard.addKey("RIGHT");
   playerInput["left"] = this.input.keyboard.addKey("LEFT");
   playerInput["up"] = this.input.keyboard.addKey("UP");
@@ -69,6 +74,8 @@ function create(this: Scene) {
 
   playerInput["face-left"] = this.input.keyboard.addKey("A");
   playerInput["face-right"] = this.input.keyboard.addKey("D");
+
+  playerInput["primary-fire"] = this.input.keyboard.addKey("SPACE");
 
   fpsText = this.add.text(16, 32, "", { fontSize: "16px", color: "#FFF" });
   pointerText = this.add.text(16, 48, "", { fontSize: "16px", color: "#FFF" });
@@ -96,11 +103,21 @@ function update(this: Scene) {
   if (playerInput["face-left"].isDown) {
     const shape = player.gameObject as Phaser.GameObjects.Polygon;
     shape.setAngle(180);
+    isFacingLeft = true;
   }
 
   if (playerInput["face-right"].isDown) {
     const shape = player.gameObject as Phaser.GameObjects.Polygon;
     shape.setAngle(0);
+    isFacingLeft = false;
+  }
+
+  if (playerInput["primary-fire"].isDown) {
+    if (isFacingLeft) {
+      laserGroup.fireLaser(player.x - 5, player.y + 10, isFacingLeft);
+    } else {
+      laserGroup.fireLaser(player.x + 45, player.y + 10, isFacingLeft);
+    }
   }
 
   fpsText.setText(debugging ? getFPSDetails() : "");
