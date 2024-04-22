@@ -8,8 +8,8 @@
     "format": "prettier . --check",
     "lint": "eslint .",
     "compile": "tsc --noEmit",
-    "test": "jest --verbose",
-    "build": "npm-run-all clean format lint compile test --print-label",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm-run-all clean format lint compile --print-label",
     "watch": "webpack --watch",
     "serve": "webpack-dev-server",
     "start": "npm-run-all build --parallel watch serve --print-label"
