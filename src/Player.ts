@@ -14,8 +14,12 @@ export class Player {
   moveUp() {}
   moveDown() {}
 
-  faceRight() {}
-  faceLeft() {}
+  faceRight() {
+    this.shape.setAngle(0);
+  }
+  faceLeft() {
+    this.shape.setAngle(180);
+  }
 
   firePrimaryWeapon() {}
 }
