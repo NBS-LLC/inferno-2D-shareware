@@ -8,18 +8,22 @@ export class Player {
   ) {}
 
   attachPrimaryWeapon(_weapon: Weapon) {}
+  firePrimaryWeapon() {}
 
-  moveRight() {}
-  moveLeft() {}
-  moveUp() {}
-  moveDown() {}
-
-  faceRight() {
-    this.shape.setAngle(0);
+  moveUp() {
+    this.body.setVelocityY(-300);
   }
+  moveDown() {
+    this.body.setVelocityY(300);
+  }
+  moveLeft() {}
+  moveRight() {}
+
   faceLeft() {
     this.shape.setAngle(180);
   }
 
-  firePrimaryWeapon() {}
+  faceRight() {
+    this.shape.setAngle(0);
+  }
 }
