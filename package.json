@@ -8,8 +8,8 @@
     "format": "prettier . --check",
     "lint": "eslint .",
     "compile": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm-run-all clean format lint compile --print-label",
+    "test": "mocha -r ts-node/register src/**/*.spec.ts",
+    "build": "npm-run-all clean format lint compile test --print-label",
     "watch": "webpack --watch",
     "serve": "webpack-dev-server",
     "start": "npm-run-all build --parallel watch serve --print-label"
@@ -31,6 +31,7 @@
     "prettier": "^3.2.5",
     "rimraf": "^5.0.5",
     "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.4.4",
     "typescript-eslint": "^7.6.0",
     "webpack": "^5.91.0",
