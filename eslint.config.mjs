@@ -7,7 +7,7 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ["jest.config.js", "webpack.config.js"],
+    ignores: ["webpack.config.js"],
   },
   {
     rules: {
