@@ -3,7 +3,7 @@ import { Weapon } from "./Weapon";
 
 export class Player {
   constructor(
-    private gameObject: GameObjects.Shape,
+    private shape: GameObjects.Shape,
     private body: Physics.Arcade.Body,
   ) {}
 

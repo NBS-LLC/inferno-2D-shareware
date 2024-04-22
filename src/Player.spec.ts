@@ -1,10 +1,16 @@
 import { expect } from "chai";
+import { GameObjects, Physics } from "phaser";
+import { mock } from "ts-mockito";
 import { Player } from "./Player";
 
 describe(Player.name, () => {
   describe(Player.prototype.faceLeft.name, () => {
     it("should face the player left", () => {
-      expect(false).to.be.true;
+      const mockShape = mock(GameObjects.Shape);
+      const mockBody = mock(Physics.Arcade.Body);
+
+      const player = new Player(mockShape, mockBody);
+      expect(player).to.be.instanceOf(Player);
     });
   });
 });
