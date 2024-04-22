@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import { beforeEach, describe, expect, it } from "@jest/globals";
 import { GameObjects, Physics } from "phaser";
 import { capture, instance, mock, reset } from "ts-mockito";
 import { Player } from "./Player";
@@ -20,7 +20,7 @@ describe(Player.name, () => {
       player.faceLeft();
 
       const [degrees] = capture(mockShape.setAngle).last();
-      expect(degrees, "angle").to.equal(180);
+      expect(degrees).toEqual(180);
     });
   });
 
@@ -29,7 +29,7 @@ describe(Player.name, () => {
       player.faceRight();
 
       const [degrees] = capture(mockShape.setAngle).last();
-      expect(degrees, "angle").to.equal(0);
+      expect(degrees).toEqual(0);
     });
   });
 
@@ -38,7 +38,7 @@ describe(Player.name, () => {
       player.moveUp();
 
       const [value] = capture(mockBody.setVelocityY).last();
-      expect(value, "velocityY").to.equal(-300);
+      expect(value).toEqual(-300);
     });
   });
 
@@ -47,7 +47,7 @@ describe(Player.name, () => {
       player.moveDown();
 
       const [value] = capture(mockBody.setVelocityY).last();
-      expect(value, "velocityY").to.equal(300);
+      expect(value).toEqual(300);
     });
   });
 });
