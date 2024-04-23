@@ -13,11 +13,18 @@ export class Player {
   moveUp() {
     this.body.setVelocityY(-300);
   }
+
   moveDown() {
     this.body.setVelocityY(300);
   }
-  moveLeft() {}
-  moveRight() {}
+
+  moveLeft() {
+    this.body.setVelocityX(-300);
+  }
+
+  moveRight() {
+    this.body.setVelocityX(300);
+  }
 
   faceLeft() {
     this.shape.setAngle(180);

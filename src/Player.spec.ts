@@ -50,4 +50,22 @@ describe(Player.name, () => {
       expect(value).toEqual(300);
     });
   });
+
+  describe(Player.prototype.moveLeft.name, () => {
+    it("should move the player left", () => {
+      player.moveLeft();
+
+      const [value] = capture(mockBody.setVelocityX).last();
+      expect(value).toEqual(-300);
+    });
+  });
+
+  describe(Player.prototype.moveRight.name, () => {
+    it("should move the player right", () => {
+      player.moveRight();
+
+      const [value] = capture(mockBody.setVelocityX).last();
+      expect(value).toEqual(300);
+    });
+  });
 });
