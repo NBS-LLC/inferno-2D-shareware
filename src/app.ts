@@ -1,10 +1,9 @@
 import { Game, Scene } from "phaser";
+import { Player } from "./Player";
 import { LaserGroup } from "./laser";
 
 import GameConfig = Phaser.Types.Core.GameConfig;
-import DynamicBody = Phaser.Physics.Arcade.Body;
 import Key = Phaser.Input.Keyboard.Key;
-import Color = Phaser.Display.Color;
 import Text = Phaser.GameObjects.Text;
 
 const config: GameConfig = {
@@ -24,9 +23,8 @@ const config: GameConfig = {
 
 const game = new Game(config);
 let debugging: boolean = false;
-let player: DynamicBody;
+let player: Player;
 const playerInput: { [key: string]: Key } = {};
-let isFacingLeft: boolean = false;
 let laserGroup: LaserGroup;
 let fpsText: Text;
 let pointerText: Text;
@@ -55,16 +53,7 @@ function create(this: Scene) {
   );
   background.fillRect(0, 0, 800, 600);
 
-  const playerShape = this.add.polygon(
-    100,
-    400,
-    getPlayerVertices(),
-    Color.GetColor(110, 110, 110),
-  );
-
-  player = this.physics.add.existing(playerShape).body as DynamicBody;
-  player.setCollideWorldBounds(true);
-
+  player = Player.createDefault(this);
   laserGroup = new LaserGroup(this);
 
   playerInput["right"] = this.input.keyboard.addKey("RIGHT");
@@ -82,41 +71,37 @@ function create(this: Scene) {
 }
 
 function update(this: Scene) {
-  player.setVelocity(0);
+  player.stopMoving();
 
   if (playerInput["right"].isDown) {
-    player.setVelocityX(300);
+    player.moveRight();
   }
 
   if (playerInput["left"].isDown) {
-    player.setVelocityX(-300);
+    player.moveLeft();
   }
 
   if (playerInput["up"].isDown) {
-    player.setVelocityY(-300);
+    player.moveUp();
   }
 
   if (playerInput["down"].isDown) {
-    player.setVelocityY(300);
+    player.moveDown();
   }
 
   if (playerInput["face-left"].isDown) {
-    const shape = player.gameObject as Phaser.GameObjects.Polygon;
-    shape.setAngle(180);
-    isFacingLeft = true;
+    player.faceLeft();
   }
 
   if (playerInput["face-right"].isDown) {
-    const shape = player.gameObject as Phaser.GameObjects.Polygon;
-    shape.setAngle(0);
-    isFacingLeft = false;
+    player.faceRight();
   }
 
   if (playerInput["primary-fire"].isDown) {
-    if (isFacingLeft) {
-      laserGroup.fireLaser(player.x - 5, player.y + 10, isFacingLeft);
+    if (player.isFacingLeft) {
+      laserGroup.fireLaser(player.x - 5, player.y + 10, player.isFacingLeft);
     } else {
-      laserGroup.fireLaser(player.x + 45, player.y + 10, isFacingLeft);
+      laserGroup.fireLaser(player.x + 45, player.y + 10, player.isFacingLeft);
     }
   }
 
@@ -126,19 +111,6 @@ function update(this: Scene) {
 
 function getDayGradient(): number[] {
   return [0x0288d1, 0x288d1, 0xacf0f2, 0xacf0f2];
-}
-
-function getPlayerVertices(): number[][] {
-  // 0,0 is top,left
-  // Positive x = right
-  // Positive y = down
-  // Vertices need to be clockwise
-
-  return [
-    [0, 0],
-    [40, 10],
-    [0, 20],
-  ];
 }
 
 function getFPSDetails(): string {
