@@ -68,4 +68,14 @@ describe(Player.name, () => {
       expect(value).toEqual(300);
     });
   });
+
+  describe(Player.prototype.stopMoving.name, () => {
+    it("should stop the player's movement", () => {
+      player.stopMoving();
+
+      const [x, y] = capture(mockBody.setVelocity).last();
+      expect(x).toEqual(0);
+      expect(y).toEqual(0);
+    });
+  });
 });
