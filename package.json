@@ -4,12 +4,13 @@
   "description": "A 2D Platformer Tribute to 90s Descent",
   "private": true,
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf dist/ coverage/",
     "format": "prettier . --check",
     "lint": "eslint .",
     "compile": "tsc --noEmit",
-    "test": "jest --verbose",
+    "test": "jest --coverage --verbose",
     "build": "npm-run-all clean format lint compile test --print-label",
+    "coverage": "chrome coverage/lcov-report/index.html",
     "watch": "webpack --watch",
     "serve": "webpack-dev-server",
     "start": "npm-run-all build --parallel watch serve --print-label"
