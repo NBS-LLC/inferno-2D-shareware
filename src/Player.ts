@@ -1,7 +1,11 @@
 import { GameObjects, Physics, Scene } from "phaser";
 import { Weapon } from "./Weapon";
+import { EmptyWeaponSystem } from "./weapons/EmptyWeaponSystem";
+import { LaserWeaponSystem } from "./weapons/LaserWeaponSystem";
 
 export class Player {
+  private primaryWeapon: Weapon = new EmptyWeaponSystem();
+
   constructor(
     private shape: GameObjects.Shape,
     private body: Physics.Arcade.Body,
@@ -29,11 +33,23 @@ export class Player {
     const body = scene.physics.add.existing(shape).body as Physics.Arcade.Body;
     body.setCollideWorldBounds(true);
 
-    return new Player(shape, body);
+    const player = new Player(shape, body);
+    player.attachPrimaryWeapon(new LaserWeaponSystem());
+
+    return player;
   }
 
-  attachPrimaryWeapon(_weapon: Weapon) {}
-  firePrimaryWeapon() {}
+  attachPrimaryWeapon(weapon: Weapon) {
+    this.primaryWeapon = weapon;
+  }
+
+  firePrimaryWeapon() {
+    this.primaryWeapon.fire(
+      this.isFacingLeft ? this.x - 5 : this.x + 45,
+      this.y + 10,
+      this.isFacingLeft ? -600 : 600,
+    );
+  }
 
   stopMoving() {
     this.body.setVelocity(0, 0);

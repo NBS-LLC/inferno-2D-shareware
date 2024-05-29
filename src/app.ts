@@ -1,6 +1,5 @@
 import { Game, Scene } from "phaser";
 import { Player } from "./Player";
-import { LaserGroup } from "./laser";
 
 import GameConfig = Phaser.Types.Core.GameConfig;
 import Key = Phaser.Input.Keyboard.Key;
@@ -25,7 +24,6 @@ const game = new Game(config);
 let debugging: boolean = false;
 let player: Player;
 const playerInput: { [key: string]: Key } = {};
-let laserGroup: LaserGroup;
 let fpsText: Text;
 let pointerText: Text;
 
@@ -54,7 +52,6 @@ function create(this: Scene) {
   background.fillRect(0, 0, 800, 600);
 
   player = Player.createDefault(this);
-  laserGroup = new LaserGroup(this);
 
   playerInput["right"] = this.input.keyboard.addKey("RIGHT");
   playerInput["left"] = this.input.keyboard.addKey("LEFT");
@@ -64,7 +61,7 @@ function create(this: Scene) {
   playerInput["face-left"] = this.input.keyboard.addKey("A");
   playerInput["face-right"] = this.input.keyboard.addKey("D");
 
-  playerInput["primary-fire"] = this.input.keyboard.addKey("SPACE");
+  playerInput["fire-primary"] = this.input.keyboard.addKey("SPACE");
 
   fpsText = this.add.text(16, 32, "", { fontSize: "16px", color: "#FFF" });
   pointerText = this.add.text(16, 48, "", { fontSize: "16px", color: "#FFF" });
@@ -97,12 +94,8 @@ function update(this: Scene) {
     player.faceRight();
   }
 
-  if (playerInput["primary-fire"].isDown) {
-    if (player.isFacingLeft) {
-      laserGroup.fireLaser(player.x - 5, player.y + 10, player.isFacingLeft);
-    } else {
-      laserGroup.fireLaser(player.x + 45, player.y + 10, player.isFacingLeft);
-    }
+  if (playerInput["fire-primary"].isDown) {
+    player.firePrimaryWeapon();
   }
 
   fpsText.setText(debugging ? getFPSDetails() : "");
