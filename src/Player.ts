@@ -34,7 +34,7 @@ export class Player {
     body.setCollideWorldBounds(true);
 
     const player = new Player(shape, body);
-    player.attachPrimaryWeapon(new LaserWeaponSystem());
+    player.attachPrimaryWeapon(new LaserWeaponSystem(scene));
 
     return player;
   }
