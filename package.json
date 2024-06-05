@@ -8,7 +8,7 @@
     "format": "prettier . --check",
     "lint": "eslint .",
     "compile": "tsc --noEmit",
-    "test": "jest --coverage --verbose",
+    "test": "jest --runInBand --coverage --verbose",
     "build": "npm-run-all clean format lint compile test --print-label",
     "coverage": "chrome coverage/lcov-report/index.html",
     "watch": "webpack --watch",
@@ -19,6 +19,7 @@
   "license": "GPL-3.0-only",
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "@geckos.io/phaser-on-nodejs": "^1.2.9",
     "@jest/globals": "^29.7.0",
     "canvas": "^2.11.2",
     "eslint": "^8.57.0",
