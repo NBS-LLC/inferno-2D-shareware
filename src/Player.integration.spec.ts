@@ -3,6 +3,8 @@ import { describe, expect, it, jest } from "@jest/globals";
 import { Game, Scene } from "phaser";
 import { Player } from "./Player";
 
+const MS_PER_FRAME = 1000 / 60;
+
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.HEADLESS,
   customEnvironment: false,
@@ -50,21 +52,33 @@ describe(Player.name, () => {
 
       player.faceLeft();
 
+      // the player was added to the scene at: 100,400
+      // the player's center is used when adding it to the scene
+      // width: 40, height: 20 => center: 20,10
+      // player absolute position: 100-20,400-10 => 80,390
+
       expect(player.x).toEqual(80);
       expect(player.y).toEqual(390);
 
-      for (let i = 1; i <= 16; i++) {
-        player.moveLeft();
-        jest.advanceTimersByTime(16);
-      }
+      // start moving the player left at 300pps, or 5ppf (300pps/60fps)
+      player.moveLeft();
 
+      // TODO: bug? player starts moving on the 2nd frame
+      // player moves left 75 pixels (5ppf * 15 frames), 80 - 75 = 5
+      jest.advanceTimersByTime(MS_PER_FRAME);
+      jest.advanceTimersByTime(15 * MS_PER_FRAME);
       expect(player.x).toEqual(5);
 
-      player.moveLeft();
-      jest.advanceTimersByTime(16);
-
+      // player moves left one more frame, 5 - 5 = 0
+      jest.advanceTimersByTime(MS_PER_FRAME);
       expect(player.isFacingLeft).toBeTruthy();
       expect(player.x).toEqual(0);
+      expect(player.y).toEqual(390);
+
+      // try to keep moving the player left
+      jest.advanceTimersByTime(10 * MS_PER_FRAME);
+      expect(player.isFacingLeft).toBeTruthy();
+      expect(player.x).toEqual(0); // must not move further left because of world bounds
       expect(player.y).toEqual(390);
     },
     1000 * 30,

@@ -12,7 +12,7 @@ export class Player {
   ) {}
 
   static createDefault(scene: Scene): Player {
-    // 0,0 is top,left
+    // 0,0 is left,top corner of the screen
     // Positive x = right
     // Positive y = down
     // Vertices need to be clockwise
