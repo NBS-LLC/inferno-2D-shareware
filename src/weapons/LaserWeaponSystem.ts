@@ -1,4 +1,9 @@
-export class LaserGroup extends Phaser.Physics.Arcade.Group {
+import { Weapon } from "../Weapon";
+
+export class LaserWeaponSystem
+  extends Phaser.Physics.Arcade.Group
+  implements Weapon
+{
   private fireDelay = 1000 * 0.25;
   private nextFireAt: number;
 
@@ -6,7 +11,7 @@ export class LaserGroup extends Phaser.Physics.Arcade.Group {
     super(scene.physics.world, scene);
 
     this.createMultiple({
-      classType: Laser,
+      classType: LaserAmmo,
       frameQuantity: 30,
       active: false,
       visible: false,
@@ -16,10 +21,10 @@ export class LaserGroup extends Phaser.Physics.Arcade.Group {
     this.delayFire();
   }
 
-  fireLaser(x: number, y: number, isFacingLeft: boolean) {
-    const laser = this.getFirstDead(false) as Laser;
+  fire(x: number, y: number, velocity: number) {
+    const laser = this.getFirstDead(false) as LaserAmmo;
     if (laser && this.canFire()) {
-      laser.fire(x, y, isFacingLeft);
+      laser.fire(x, y, velocity);
       this.delayFire();
     }
   }
@@ -33,7 +38,7 @@ export class LaserGroup extends Phaser.Physics.Arcade.Group {
   }
 }
 
-class Laser extends Phaser.GameObjects.Line {
+class LaserAmmo extends Phaser.GameObjects.Line {
   body: Phaser.Physics.Arcade.Body;
 
   constructor(scene: Phaser.Scene) {
@@ -49,7 +54,12 @@ class Laser extends Phaser.GameObjects.Line {
     );
 
     this.setLineWidth(2, 1);
-    this.postFX.addGlow(Phaser.Display.Color.GetColor(201, 232, 255), 4);
+
+    try {
+      this.postFX.addGlow(Phaser.Display.Color.GetColor(201, 232, 255), 4);
+    } catch {
+      /* Does Nothing */
+    }
 
     scene.physics.add.existing(this);
   }
@@ -61,15 +71,11 @@ class Laser extends Phaser.GameObjects.Line {
     }
   }
 
-  fire(x: number, y: number, isFacingLeft: boolean) {
+  fire(x: number, y: number, velocity: number) {
     this.body.reset(x, y);
     this.setActive(true);
     this.setVisible(true);
 
-    if (isFacingLeft) {
-      this.body.setVelocityX(-600);
-    } else {
-      this.body.setVelocityX(600);
-    }
+    this.body.setVelocityX(velocity);
   }
 }
