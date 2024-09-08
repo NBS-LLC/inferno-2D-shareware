@@ -3,6 +3,8 @@ import { describe, expect, it, jest } from "@jest/globals";
 import { Game, Scene } from "phaser";
 import { Player } from "./Player";
 
+window.focus = jest.fn();
+
 const MS_PER_FRAME = 1000 / 60;
 
 const config: Phaser.Types.Core.GameConfig = {
