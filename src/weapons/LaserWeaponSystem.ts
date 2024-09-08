@@ -54,7 +54,12 @@ class LaserAmmo extends Phaser.GameObjects.Line {
     );
 
     this.setLineWidth(2, 1);
-    // this.postFX.addGlow(Phaser.Display.Color.GetColor(201, 232, 255), 4);
+
+    try {
+      this.postFX.addGlow(Phaser.Display.Color.GetColor(201, 232, 255), 4);
+    } catch {
+      /* Does Nothing */
+    }
 
     scene.physics.add.existing(this);
   }
