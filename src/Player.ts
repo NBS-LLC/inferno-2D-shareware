@@ -1,8 +1,11 @@
 import { GameObjects, Physics, Scene } from "phaser";
+import { applyMixins } from "./Mixins";
+import { Movement } from "./Movement";
 import { Weapon } from "./Weapon";
 import { EmptyWeaponSystem } from "./weapons/EmptyWeaponSystem";
 import { LaserWeaponSystem } from "./weapons/LaserWeaponSystem";
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class Player {
   private primaryWeapon: Weapon = new EmptyWeaponSystem();
 
@@ -39,6 +42,10 @@ export class Player {
     return player;
   }
 
+  getBody() {
+    return this.body;
+  }
+
   attachPrimaryWeapon(weapon: Weapon) {
     this.primaryWeapon = weapon;
   }
@@ -49,26 +56,6 @@ export class Player {
       this.y + 10,
       this.isFacingLeft ? -600 : 600,
     );
-  }
-
-  stopMoving() {
-    this.body.setVelocity(0, 0);
-  }
-
-  moveUp() {
-    this.body.setVelocityY(-300);
-  }
-
-  moveDown() {
-    this.body.setVelocityY(300);
-  }
-
-  moveLeft() {
-    this.body.setVelocityX(-300);
-  }
-
-  moveRight() {
-    this.body.setVelocityX(300);
   }
 
   faceLeft() {
@@ -91,3 +78,7 @@ export class Player {
     return Math.abs(this.shape.angle) === 180;
   }
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+export interface Player extends Movement {}
+applyMixins(Player, [Movement]);
