@@ -55,7 +55,7 @@ function create(this: Scene) {
 
   player = Player.createDefault(this);
 
-  enemy = Enemy.createDefault(this);
+  enemy = Enemy.createDefault(this, 700, 400);
   enemy.faceLeft();
 
   playerInput["right"] = this.input.keyboard.addKey("RIGHT");
