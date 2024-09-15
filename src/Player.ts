@@ -46,6 +46,10 @@ export class Player {
     return this.body;
   }
 
+  getShape() {
+    return this.shape;
+  }
+
   attachPrimaryWeapon(weapon: Weapon) {
     this.primaryWeapon = weapon;
   }
@@ -58,24 +62,12 @@ export class Player {
     );
   }
 
-  faceLeft() {
-    this.shape.setAngle(180);
-  }
-
-  faceRight() {
-    this.shape.setAngle(0);
-  }
-
   get x() {
     return this.body.x;
   }
 
   get y() {
     return this.body.y;
-  }
-
-  get isFacingLeft() {
-    return Math.abs(this.shape.angle) === 180;
   }
 }
 
