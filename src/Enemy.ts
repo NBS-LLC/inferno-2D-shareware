@@ -1,8 +1,11 @@
 import { GameObjects, Physics, Scene } from "phaser";
+import { applyMixins } from "./Mixins";
+import { Movement } from "./Movement";
 import { Weapon } from "./Weapon";
 import { EmptyWeaponSystem } from "./weapons/EmptyWeaponSystem";
 import { LaserWeaponSystem } from "./weapons/LaserWeaponSystem";
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class Enemy {
   private primaryWeapon: Weapon = new EmptyWeaponSystem();
 
@@ -40,6 +43,10 @@ export class Enemy {
     return ship;
   }
 
+  getBody() {
+    return this.body;
+  }
+
   attachPrimaryWeapon(weapon: Weapon) {
     this.primaryWeapon = weapon;
   }
@@ -50,26 +57,6 @@ export class Enemy {
       this.y + 10,
       this.isFacingLeft ? -600 : 600,
     );
-  }
-
-  stopMoving() {
-    this.body.setVelocity(0, 0);
-  }
-
-  moveUp() {
-    this.body.setVelocityY(-300);
-  }
-
-  moveDown() {
-    this.body.setVelocityY(300);
-  }
-
-  moveLeft() {
-    this.body.setVelocityX(-300);
-  }
-
-  moveRight() {
-    this.body.setVelocityX(300);
   }
 
   faceLeft() {
@@ -92,3 +79,7 @@ export class Enemy {
     return Math.abs(this.shape.angle) === 180;
   }
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+export interface Enemy extends Movement {}
+applyMixins(Enemy, [Movement]);
