@@ -32,24 +32,6 @@ describe(Movement.name, () => {
     movement = new TestMovement(instance(mockBody), instance(mockShape));
   });
 
-  describe(Movement.prototype.faceLeft.name, () => {
-    it("should face the shape left", () => {
-      movement.faceLeft();
-
-      const [degrees] = capture(mockShape.setAngle).last();
-      expect(degrees).toEqual(180);
-    });
-  });
-
-  describe(Movement.prototype.faceRight.name, () => {
-    it("should face the shape right", () => {
-      movement.faceRight();
-
-      const [degrees] = capture(mockShape.setAngle).last();
-      expect(degrees).toEqual(0);
-    });
-  });
-
   describe(Movement.prototype.moveUp.name, () => {
     it("should move the body up", () => {
       movement.moveUp();

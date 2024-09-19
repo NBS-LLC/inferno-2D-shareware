@@ -1,6 +1,7 @@
 import { GameObjects, Physics, Scene } from "phaser";
 import { applyMixins } from "./Mixins";
 import { Movement } from "./Movement";
+import { Position } from "./Position";
 import { Weapon } from "./Weapon";
 import { EmptyWeaponSystem } from "./weapons/EmptyWeaponSystem";
 import { LaserWeaponSystem } from "./weapons/LaserWeaponSystem";
@@ -62,16 +63,8 @@ export class Enemy {
       this.isFacingLeft ? -600 : 600,
     );
   }
-
-  get x() {
-    return this.body.x;
-  }
-
-  get y() {
-    return this.body.y;
-  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-export interface Enemy extends Movement {}
-applyMixins(Enemy, [Movement]);
+export interface Enemy extends Movement, Position {}
+applyMixins(Enemy, [Movement, Position]);
