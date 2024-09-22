@@ -14,6 +14,7 @@ class TestPosition extends Position {
   getBody(): Physics.Arcade.Body {
     return this.body;
   }
+
   getShape(): GameObjects.Shape {
     return this.shape;
   }

@@ -1,35 +1,25 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
-import { GameObjects, Physics } from "phaser";
+import { Physics } from "phaser";
 import { capture, instance, mock, reset } from "ts-mockito";
 import { Movement } from "./Movement";
 
 class TestMovement extends Movement {
-  constructor(
-    private body: Physics.Arcade.Body,
-    private shape: GameObjects.Shape,
-  ) {
+  constructor(private body: Physics.Arcade.Body) {
     super();
   }
 
   getBody(): Physics.Arcade.Body {
     return this.body;
   }
-
-  getShape(): GameObjects.Shape {
-    return this.shape;
-  }
 }
 
 describe(Movement.name, () => {
   const mockBody = mock(Physics.Arcade.Body);
-  const mockShape = mock(GameObjects.Shape);
   let movement: Movement;
 
   beforeEach(() => {
     reset(mockBody);
-    reset(mockShape);
-
-    movement = new TestMovement(instance(mockBody), instance(mockShape));
+    movement = new TestMovement(instance(mockBody));
   });
 
   describe(Movement.prototype.moveUp.name, () => {
