@@ -6,7 +6,6 @@ import { Weapon } from "./Weapon";
 import { EmptyWeaponSystem } from "./weapons/EmptyWeaponSystem";
 import { LaserWeaponSystem } from "./weapons/LaserWeaponSystem";
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class Player {
   private primaryWeapon: Weapon = new EmptyWeaponSystem();
 
@@ -64,6 +63,7 @@ export class Player {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-export interface Player extends Movement, Position {}
 applyMixins(Player, [Movement, Position]);
+declare module "./Player" {
+  interface Player extends Movement, Position {}
+}
