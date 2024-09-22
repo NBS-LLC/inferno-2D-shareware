@@ -37,9 +37,7 @@ function init(this: Scene) {
     .on("down", () => (debugging = !debugging));
 }
 
-function preload(this: Scene) {
-  // TODO: Preload scene data.
-}
+function preload(this: Scene) {}
 
 function create(this: Scene) {
   const background = this.add.graphics();
