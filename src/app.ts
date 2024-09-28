@@ -1,4 +1,5 @@
 import { Game, Scene } from "phaser";
+import { Enemy } from "./Enemy";
 import { Player } from "./Player";
 
 import GameConfig = Phaser.Types.Core.GameConfig;
@@ -23,6 +24,7 @@ const config: GameConfig = {
 const game = new Game(config);
 let debugging: boolean = false;
 let player: Player;
+let enemy: Enemy;
 const playerInput: { [key: string]: Key } = {};
 let fpsText: Text;
 let pointerText: Text;
@@ -35,9 +37,7 @@ function init(this: Scene) {
     .on("down", () => (debugging = !debugging));
 }
 
-function preload(this: Scene) {
-  // TODO: Preload scene data.
-}
+function preload(this: Scene) {}
 
 function create(this: Scene) {
   const background = this.add.graphics();
@@ -52,6 +52,9 @@ function create(this: Scene) {
   background.fillRect(0, 0, 800, 600);
 
   player = Player.createDefault(this);
+
+  enemy = Enemy.createDefault(this, 700, 400);
+  enemy.faceLeft();
 
   playerInput["right"] = this.input.keyboard.addKey("RIGHT");
   playerInput["left"] = this.input.keyboard.addKey("LEFT");

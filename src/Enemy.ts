@@ -6,7 +6,7 @@ import { Weapon } from "./Weapon";
 import { EmptyWeaponSystem } from "./weapons/EmptyWeaponSystem";
 import { LaserWeaponSystem } from "./weapons/LaserWeaponSystem";
 
-export class Player {
+export class Enemy {
   private primaryWeapon: Weapon = new EmptyWeaponSystem();
 
   constructor(
@@ -14,7 +14,7 @@ export class Player {
     private body: Physics.Arcade.Body,
   ) {}
 
-  static createDefault(scene: Scene): Player {
+  static createDefault(scene: Scene, x: number = 0, y: number = 0): Enemy {
     // 0,0 is left,top corner of the screen
     // Positive x = right
     // Positive y = down
@@ -22,24 +22,25 @@ export class Player {
 
     const playerVertices = [
       [0, 0],
-      [40, 10],
+      [40, 0],
+      [40, 20],
       [0, 20],
     ];
 
     const shape = scene.add.polygon(
-      100,
-      400,
+      x,
+      y,
       playerVertices,
-      Phaser.Display.Color.GetColor(110, 110, 110),
+      Phaser.Display.Color.GetColor(200, 110, 110),
     );
 
     const body = scene.physics.add.existing(shape).body as Physics.Arcade.Body;
     body.setCollideWorldBounds(true);
 
-    const player = new Player(shape, body);
-    player.attachPrimaryWeapon(new LaserWeaponSystem(scene));
+    const ship = new Enemy(shape, body);
+    ship.attachPrimaryWeapon(new LaserWeaponSystem(scene));
 
-    return player;
+    return ship;
   }
 
   getBody() {
@@ -63,7 +64,7 @@ export class Player {
   }
 }
 
-applyMixins(Player, [Movement, Position]);
-declare module "./Player" {
-  interface Player extends Movement, Position {}
+applyMixins(Enemy, [Movement, Position]);
+declare module "./Enemy" {
+  interface Enemy extends Movement, Position {}
 }
