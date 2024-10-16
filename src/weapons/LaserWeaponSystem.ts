@@ -66,26 +66,50 @@ class LaserAmmo extends Phaser.GameObjects.Line {
       frictionAir: 0,
     });
 
+    this.body.onCollideCallback = this.onCollision.bind(this);
+
     this.scene.matter.body.setInertia(this.body, Infinity);
     this.scene.matter.world.remove(this.body, true);
   }
 
   preUpdate() {
     if (this.x < 0 || this.x > 800) {
-      this.setActive(false);
-      this.setVisible(false);
-      this.scene.matter.world.remove(this.body, true);
+      this.hide();
     }
   }
 
   fire(x: number, y: number, velocity: number) {
-    this.scene.matter.world.add(this.body);
-
-    this.setPosition(x, y);
-    this.setActive(true);
-    this.setVisible(true);
-
+    this.unhide();
+    this.scene.matter.body.setPosition(this.body, { x, y });
     this.scene.matter.setVelocityY(this.body, 0);
     this.scene.matter.setVelocityX(this.body, velocity);
+  }
+
+  onCollision(pair: Phaser.Types.Physics.Matter.MatterCollisionPair) {
+    const { bodyA, bodyB } = pair;
+
+    if (bodyA.gameObject instanceof LaserAmmo) {
+      bodyA.gameObject.hide();
+    } else {
+      bodyA.gameObject.destroy();
+    }
+
+    if (bodyB.gameObject instanceof LaserAmmo) {
+      bodyB.gameObject.hide();
+    } else {
+      bodyB.gameObject.destroy();
+    }
+  }
+
+  private hide() {
+    this.setActive(false);
+    this.setVisible(false);
+    this.scene.matter.world.remove(this.body, true);
+  }
+
+  private unhide() {
+    this.scene.matter.world.add(this.body);
+    this.setVisible(true);
+    this.setActive(true);
   }
 }
