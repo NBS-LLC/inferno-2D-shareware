@@ -1,9 +1,12 @@
 import { Game, Scene } from "phaser";
+import { Weapon } from "./Weapon";
+import { LaserWeaponSystem } from "./weapons/LaserWeaponSystem";
 
 class MainScene extends Scene {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   private player: Phaser.GameObjects.GameObject;
   private enemy: Phaser.GameObjects.GameObject;
+  private weapon: Weapon;
 
   constructor() {
     super("GameScene");
@@ -29,6 +32,8 @@ class MainScene extends Scene {
 
     // TODO: make the body boundary match the shape (triangle)
     this.matter.add.gameObject(this.player);
+
+    this.weapon = new LaserWeaponSystem(this);
 
     // Enemy
 
@@ -64,6 +69,14 @@ class MainScene extends Scene {
       this.matter.setVelocityY(this.player.body as MatterJS.BodyType, -speed);
     } else if (this.cursors.down.isDown) {
       this.matter.setVelocityY(this.player.body as MatterJS.BodyType, speed);
+    }
+
+    if (this.cursors.space.isDown) {
+      this.weapon.fire(
+        this.player.body.position.x + 25,
+        this.player.body.position.y ,
+        10,
+      );
     }
   }
 }

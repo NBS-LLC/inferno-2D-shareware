@@ -1,14 +1,14 @@
 import { Weapon } from "../Weapon";
 
 export class LaserWeaponSystem
-  extends Phaser.Physics.Arcade.Group
+  extends Phaser.GameObjects.Group
   implements Weapon
 {
   private fireDelay = 1000 * 0.25;
   private nextFireAt: number;
 
   constructor(scene: Phaser.Scene) {
-    super(scene.physics.world, scene);
+    super(scene);
 
     this.createMultiple({
       classType: LaserAmmo,
@@ -39,7 +39,7 @@ export class LaserWeaponSystem
 }
 
 class LaserAmmo extends Phaser.GameObjects.Line {
-  body: Phaser.Physics.Arcade.Body;
+  body: MatterJS.BodyType;
 
   constructor(scene: Phaser.Scene) {
     super(
@@ -62,21 +62,30 @@ class LaserAmmo extends Phaser.GameObjects.Line {
     //   /* Does Nothing */
     // }
 
-    scene.physics.add.existing(this);
+    scene.matter.add.gameObject(this, {
+      frictionAir: 0,
+    });
+
+    this.scene.matter.body.setInertia(this.body, Infinity);
+    this.scene.matter.world.remove(this.body, true);
   }
 
   preUpdate() {
     if (this.x < 0 || this.x > 800) {
       this.setActive(false);
       this.setVisible(false);
+      this.scene.matter.world.remove(this.body, true);
     }
   }
 
   fire(x: number, y: number, velocity: number) {
-    this.body.reset(x, y);
+    this.scene.matter.world.add(this.body);
+
+    this.setPosition(x, y);
     this.setActive(true);
     this.setVisible(true);
 
-    this.body.setVelocityX(velocity);
+    this.scene.matter.setVelocityY(this.body, 0);
+    this.scene.matter.setVelocityX(this.body, velocity);
   }
 }
