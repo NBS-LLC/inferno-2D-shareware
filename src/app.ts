@@ -1,6 +1,7 @@
 import { Game, Scene } from "phaser";
 
 class MainScene extends Scene {
+  private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   private player: Phaser.GameObjects.Polygon;
 
   constructor() {
@@ -8,6 +9,8 @@ class MainScene extends Scene {
   }
 
   create() {
+    this.cursors = this.input.keyboard.createCursorKeys();
+
     const playerVertices = [
       [0, 0],
       [40, 10],
@@ -22,6 +25,22 @@ class MainScene extends Scene {
     );
 
     this.matter.add.gameObject(this.player);
+  }
+
+  update(_time: number, _delta: number): void {
+    this.matter.setVelocity(this.player.body as MatterJS.BodyType, 0, 0);
+
+    if (this.cursors.left.isDown) {
+      this.matter.setVelocityX(this.player.body as MatterJS.BodyType, -5);
+    } else if (this.cursors.right.isDown) {
+      this.matter.setVelocityX(this.player.body as MatterJS.BodyType, 5);
+    }
+
+    if (this.cursors.up.isDown) {
+      this.matter.setVelocityY(this.player.body as MatterJS.BodyType, -5);
+    } else if (this.cursors.down.isDown) {
+      this.matter.setVelocityY(this.player.body as MatterJS.BodyType, 5);
+    }
   }
 }
 
