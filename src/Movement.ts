@@ -1,25 +1,27 @@
-import { Physics } from "phaser";
-
 export abstract class Movement {
-  abstract getBody(): Physics.Arcade.Body;
+  abstract getBody(): MatterJS.BodyType;
 
   stopMoving() {
-    this.getBody().setVelocity(0, 0);
+    this.getMatter().setVelocity(this.getBody(), 0, 0);
   }
 
   moveUp() {
-    this.getBody().setVelocityY(-300);
+    this.getMatter().setVelocityY(this.getBody(), -5);
   }
 
   moveDown() {
-    this.getBody().setVelocityY(300);
+    this.getMatter().setVelocityY(this.getBody(), 5);
   }
 
   moveLeft() {
-    this.getBody().setVelocityX(-300);
+    this.getMatter().setVelocityX(this.getBody(), -5);
   }
 
   moveRight() {
-    this.getBody().setVelocityX(300);
+    this.getMatter().setVelocityX(this.getBody(), 5);
+  }
+
+  private getMatter() {
+    return this.getBody().gameObject.scene.matter;
   }
 }

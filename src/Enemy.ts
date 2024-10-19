@@ -1,4 +1,4 @@
-import { GameObjects, Physics, Scene } from "phaser";
+import { GameObjects, Scene } from "phaser";
 import { applyMixins } from "./Mixins";
 import { Movement } from "./Movement";
 import { Position } from "./Position";
@@ -11,7 +11,7 @@ export class Enemy {
 
   constructor(
     private shape: GameObjects.Shape,
-    private body: Physics.Arcade.Body,
+    private body: MatterJS.BodyType,
   ) {}
 
   static createDefault(scene: Scene, x: number = 0, y: number = 0): Enemy {
@@ -34,8 +34,8 @@ export class Enemy {
       Phaser.Display.Color.GetColor(200, 110, 110),
     );
 
-    const body = scene.physics.add.existing(shape).body as Physics.Arcade.Body;
-    body.setCollideWorldBounds(true);
+    const body = scene.matter.add.gameObject(shape).body as MatterJS.BodyType;
+    scene.matter.body.setInertia(body, Infinity);
 
     const ship = new Enemy(shape, body);
     ship.attachPrimaryWeapon(new LaserWeaponSystem(scene));
@@ -57,9 +57,9 @@ export class Enemy {
 
   firePrimaryWeapon() {
     this.primaryWeapon.fire(
-      this.isFacingLeft ? this.x - 5 : this.x + 45,
-      this.y + 10,
-      this.isFacingLeft ? -600 : 600,
+      this.isFacingLeft ? this.x - 20 : this.x + 20,
+      this.y,
+      this.isFacingLeft ? -10 : 10,
     );
   }
 }
