@@ -39,7 +39,7 @@ export class LaserWeaponSystem
 }
 
 class LaserAmmo extends Phaser.GameObjects.Line {
-  body: Phaser.Physics.Arcade.Body;
+  body: MatterJS.BodyType;
 
   constructor(scene: Phaser.Scene) {
     super(
@@ -62,21 +62,55 @@ class LaserAmmo extends Phaser.GameObjects.Line {
     //   /* Does Nothing */
     // }
 
-    scene.physics.add.existing(this);
+    scene.matter.add.gameObject(this, {
+      frictionAir: 0,
+    });
+
+    // TODO: use arrow function notation instead of binding "this".
+    this.body.onCollideCallback = this.onCollision.bind(this);
+
+    this.scene.matter.body.setInertia(this.body, Infinity);
+    this.scene.matter.world.remove(this.body, true);
   }
 
   preUpdate() {
     if (this.x < 0 || this.x > 800) {
-      this.setActive(false);
-      this.setVisible(false);
+      this.hide();
     }
   }
 
   fire(x: number, y: number, velocity: number) {
-    this.body.reset(x, y);
-    this.setActive(true);
-    this.setVisible(true);
+    this.unhide();
+    this.scene.matter.body.setPosition(this.body, { x, y });
+    this.scene.matter.setVelocityY(this.body, 0);
+    this.scene.matter.setVelocityX(this.body, velocity);
+  }
 
-    this.body.setVelocityX(velocity);
+  onCollision(pair: Phaser.Types.Physics.Matter.MatterCollisionPair) {
+    const { bodyA, bodyB } = pair;
+
+    if (bodyA.gameObject instanceof LaserAmmo) {
+      bodyA.gameObject.hide();
+    } else {
+      bodyA.gameObject.destroy();
+    }
+
+    if (bodyB.gameObject instanceof LaserAmmo) {
+      bodyB.gameObject.hide();
+    } else {
+      bodyB.gameObject.destroy();
+    }
+  }
+
+  private hide() {
+    this.setActive(false);
+    this.setVisible(false);
+    this.scene.matter.world.remove(this.body, true);
+  }
+
+  private unhide() {
+    this.scene.matter.world.add(this.body);
+    this.setVisible(true);
+    this.setActive(true);
   }
 }
