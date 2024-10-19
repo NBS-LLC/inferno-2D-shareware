@@ -1,16 +1,18 @@
 import { Game } from "phaser";
 import { MainScene } from "./scenes/MainScene";
 
-import GameConfig = Phaser.Types.Core.GameConfig;
+class Inferno2DGame extends Game {
+  constructor() {
+    super({
+      type: Phaser.AUTO,
+      width: 800,
+      height: 600,
+      physics: {
+        default: "arcade",
+      },
+      scene: [MainScene],
+    });
+  }
+}
 
-const config: GameConfig = {
-  type: Phaser.AUTO,
-  width: 800,
-  height: 600,
-  physics: {
-    default: "arcade",
-  },
-  scene: [MainScene],
-};
-
-new Game(config);
+new Inferno2DGame();
