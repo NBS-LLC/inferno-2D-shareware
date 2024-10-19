@@ -20,7 +20,6 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   scene: {
     create,
-    update,
   },
 };
 
@@ -29,8 +28,6 @@ let player: Player;
 function create(this: Scene) {
   player = Player.createDefault(this);
 }
-
-function update(this: Scene) {}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
