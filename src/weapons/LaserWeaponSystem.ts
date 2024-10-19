@@ -1,14 +1,14 @@
 import { Weapon } from "../Weapon";
 
 export class LaserWeaponSystem
-  extends Phaser.Physics.Arcade.Group
+  extends Phaser.GameObjects.Group
   implements Weapon
 {
   private fireDelay = 1000 * 0.25;
   private nextFireAt: number;
 
   constructor(scene: Phaser.Scene) {
-    super(scene.physics.world, scene);
+    super(scene);
 
     this.createMultiple({
       classType: LaserAmmo,
