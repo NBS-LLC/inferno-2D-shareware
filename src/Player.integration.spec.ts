@@ -16,7 +16,13 @@ const config: Phaser.Types.Core.GameConfig = {
     noAudio: true,
   },
   physics: {
-    default: "arcade",
+    default: "matter",
+    matter: {
+      gravity: { x: 0, y: 0 },
+    },
+  },
+  fps: {
+    forceSetTimeOut: true,
   },
   scene: {
     create,
@@ -49,36 +55,34 @@ describe(Player.name, () => {
         await sleep(100);
       }
 
-      player.faceLeft();
-
       // the player was added to the scene at: 100,400
-      // the player's center is used when adding it to the scene
-      // width: 40, height: 20 => center: 20,10
-      // player absolute position: 100-20,400-10 => 80,390
+      expect(player.x).toEqual(100);
+      expect(player.y).toEqual(400);
 
-      expect(player.x).toEqual(80);
-      expect(player.y).toEqual(390);
+      // move the player right at 5ppf for 25 frames
+      for (let n = 1; n <= 25; n++) {
+        player.moveRight();
+        jest.advanceTimersByTime(MS_PER_FRAME);
+      }
 
-      // start moving the player left at 300pps, or 5ppf (300pps/60fps)
-      player.moveLeft();
+      // the player should now be roughly located at 225,400
+      expect(player.x).toBeGreaterThan(100 + 5 * 24);
+      expect(player.x).toBeLessThan(100 * 5 * 26);
+      expect(player.y).toEqual(400);
 
-      // TODO: bug? player starts moving on the 2nd frame
-      // player moves left 75 pixels (5ppf * 15 frames), 80 - 75 = 5
-      jest.advanceTimersByTime(MS_PER_FRAME);
-      jest.advanceTimersByTime(15 * MS_PER_FRAME);
-      expect(player.x).toEqual(5);
+      player.stopMoving();
 
-      // player moves left one more frame, 5 - 5 = 0
-      jest.advanceTimersByTime(MS_PER_FRAME);
-      expect(player.isFacingLeft).toBeTruthy();
-      expect(player.x).toEqual(0);
-      expect(player.y).toEqual(390);
+      // move the player up at 5ppf for 10 frames
+      for (let n = 1; n <= 10; n++) {
+        player.moveUp();
+        jest.advanceTimersByTime(MS_PER_FRAME);
+      }
 
-      // try to keep moving the player left
-      jest.advanceTimersByTime(10 * MS_PER_FRAME);
-      expect(player.isFacingLeft).toBeTruthy();
-      expect(player.x).toEqual(0); // must not move further left because of world bounds
-      expect(player.y).toEqual(390);
+      // the player should now be roughly located at 225,350
+      expect(player.x).toBeGreaterThan(100 + 5 * 24);
+      expect(player.x).toBeLessThan(100 * 5 * 26);
+      expect(player.y).toBeGreaterThan(400 - 5 * 11);
+      expect(player.y).toBeLessThan(400 - 5 * 9);
     },
     1000 * 30,
   );
