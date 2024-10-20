@@ -35,25 +35,13 @@ function create(this: Scene) {
   player = Player.createDefault(this);
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 jest.useFakeTimers();
 
 describe(Player.name, () => {
   it(
     "Integration",
     async () => {
-      const game = new Game(config);
-
-      while (!game.isBooted) {
-        await sleep(100);
-      }
-
-      while (!game.isRunning) {
-        await sleep(100);
-      }
+      new Game(config);
 
       // the player was added to the scene at: 100,400
       expect(player.x).toEqual(100);
