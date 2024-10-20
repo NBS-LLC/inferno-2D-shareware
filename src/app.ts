@@ -8,7 +8,11 @@ class Inferno2DGame extends Game {
       width: 800,
       height: 600,
       physics: {
-        default: "arcade",
+        default: "matter",
+        matter: {
+          debug: false,
+          gravity: { x: 0, y: 0 },
+        },
       },
       scene: [MainScene],
     });

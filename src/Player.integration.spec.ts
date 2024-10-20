@@ -1,6 +1,7 @@
 import "@geckos.io/phaser-on-nodejs";
-import { describe, expect, it, jest } from "@jest/globals";
+import { describe, expect, jest, test } from "@jest/globals";
 import { Game, Scene } from "phaser";
+import { Enemy } from "./Enemy";
 import { Player } from "./Player";
 
 window.focus = jest.fn();
@@ -16,7 +17,13 @@ const config: Phaser.Types.Core.GameConfig = {
     noAudio: true,
   },
   physics: {
-    default: "arcade",
+    default: "matter",
+    matter: {
+      gravity: { x: 0, y: 0 },
+    },
+  },
+  fps: {
+    forceSetTimeOut: true,
   },
   scene: {
     create,
@@ -24,62 +31,110 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 
 let player: Player;
+let enemy: Enemy;
 
 function create(this: Scene) {
   player = Player.createDefault(this);
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  enemy = Enemy.createDefault(this, 700, 400);
 }
 
 jest.useFakeTimers();
 
 describe(Player.name, () => {
-  it(
-    "Integration",
-    async () => {
-      const game = new Game(config);
+  describe("Integration", () => {
+    test(
+      "Movement and Position",
+      async () => {
+        new Game(config);
 
-      while (!game.isBooted) {
-        await sleep(100);
-      }
+        // the player was added to the scene at: 100,400
+        expect(player.x).toEqual(100);
+        expect(player.y).toEqual(400);
 
-      while (!game.isRunning) {
-        await sleep(100);
-      }
+        // move the player right at 5ppf for 25 frames
+        for (let n = 1; n <= 25; n++) {
+          player.moveRight();
+          jest.advanceTimersByTime(MS_PER_FRAME);
+        }
 
-      player.faceLeft();
+        player.stopMoving();
+        jest.advanceTimersByTime(MS_PER_FRAME);
+
+        // the player should now be roughly located at 225,400
+        expect(player.x).toBeCloseTo(225);
+        expect(player.y).toEqual(400);
+
+        // move the player up at 5ppf for 10 frames
+        for (let n = 1; n <= 10; n++) {
+          player.moveUp();
+          jest.advanceTimersByTime(MS_PER_FRAME);
+        }
+
+        player.stopMoving();
+        jest.advanceTimersByTime(MS_PER_FRAME);
+
+        // the player should now be roughly located at 225,350
+        expect(player.x).toBeCloseTo(225);
+        expect(player.y).toBeCloseTo(350);
+
+        // move the player down and left at 5ppf for 10 frames
+        for (let n = 1; n <= 10; n++) {
+          player.moveDown();
+          player.moveLeft();
+          jest.advanceTimersByTime(MS_PER_FRAME);
+        }
+
+        player.stopMoving();
+        jest.advanceTimersByTime(MS_PER_FRAME);
+
+        // the player should now be roughly located at 175,400
+        expect(player.x).toBeCloseTo(175);
+        expect(player.y).toBeCloseTo(400);
+
+        // should face right by default
+        expect(player.getShape().angle).toEqual(0);
+        expect(player.isFacingLeft).toBeFalsy();
+
+        // have the player face left
+        player.faceLeft();
+        jest.advanceTimersByTime(MS_PER_FRAME);
+        expect(player.getShape().angle).toEqual(-180);
+        expect(player.isFacingLeft).toBeTruthy();
+
+        // have the player face right
+        player.faceRight();
+        jest.advanceTimersByTime(MS_PER_FRAME);
+        expect(player.getShape().angle).toEqual(0);
+        expect(player.isFacingLeft).toBeFalsy();
+      },
+      1000 * 30,
+    );
+    test("Weapon System", async () => {
+      new Game(config);
+      jest.advanceTimersByTime(MS_PER_FRAME);
 
       // the player was added to the scene at: 100,400
-      // the player's center is used when adding it to the scene
-      // width: 40, height: 20 => center: 20,10
-      // player absolute position: 100-20,400-10 => 80,390
+      expect(player.x).toEqual(100);
+      expect(player.y).toEqual(400);
 
-      expect(player.x).toEqual(80);
-      expect(player.y).toEqual(390);
+      // the enemy was added to the scene at: 700,400
+      expect(enemy.x).toEqual(700);
+      expect(enemy.y).toEqual(400);
 
-      // start moving the player left at 300pps, or 5ppf (300pps/60fps)
-      player.moveLeft();
+      // fire the player's primary weapon at 10ppf
+      player.firePrimaryWeapon();
 
-      // TODO: bug? player starts moving on the 2nd frame
-      // player moves left 75 pixels (5ppf * 15 frames), 80 - 75 = 5
-      jest.advanceTimersByTime(MS_PER_FRAME);
-      jest.advanceTimersByTime(15 * MS_PER_FRAME);
-      expect(player.x).toEqual(5);
+      // the laser should be roughly 600,400: no collision
+      jest.advanceTimersByTime(50 * MS_PER_FRAME);
+      expect(enemy.getShape().active).toBeTruthy();
 
-      // player moves left one more frame, 5 - 5 = 0
-      jest.advanceTimersByTime(MS_PER_FRAME);
-      expect(player.isFacingLeft).toBeTruthy();
-      expect(player.x).toEqual(0);
-      expect(player.y).toEqual(390);
-
-      // try to keep moving the player left
+      // the laser should be roughly 700,400: collision with enemy
       jest.advanceTimersByTime(10 * MS_PER_FRAME);
-      expect(player.isFacingLeft).toBeTruthy();
-      expect(player.x).toEqual(0); // must not move further left because of world bounds
-      expect(player.y).toEqual(390);
-    },
-    1000 * 30,
-  );
+      expect(enemy.getShape().active).toBeFalsy();
+      expect(enemy.getShape().body).toBeUndefined();
+
+      // BUG: getBody() will hold onto a destroyed game object's body
+      // TODO: expect(enemy.getBody()).toBeUndefined();
+    });
+  });
 });

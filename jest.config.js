@@ -1,9 +1,10 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  preset: "ts-jest",
-  testEnvironment: "jsdom",
   globals: {
-    TextEncoder: require("util").TextEncoder,
     TextDecoder: require("util").TextDecoder,
+    TextEncoder: require("util").TextEncoder,
   },
+  preset: "ts-jest",
+  setupFilesAfterEnv: ["./setup-jest.js"],
+  testEnvironment: "jsdom",
 };

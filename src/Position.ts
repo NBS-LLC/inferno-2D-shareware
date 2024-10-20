@@ -1,7 +1,7 @@
-import { GameObjects, Physics } from "phaser";
+import { GameObjects } from "phaser";
 
 export abstract class Position {
-  abstract getBody(): Physics.Arcade.Body;
+  abstract getBody(): MatterJS.BodyType;
   abstract getShape(): GameObjects.Shape;
 
   faceLeft() {
@@ -17,10 +17,10 @@ export abstract class Position {
   }
 
   get x() {
-    return this.getBody().x;
+    return this.getBody().position.x;
   }
 
   get y() {
-    return this.getBody().y;
+    return this.getBody().position.y;
   }
 }
