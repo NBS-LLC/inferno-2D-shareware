@@ -83,6 +83,22 @@ describe(Player.name, () => {
       expect(player.x).toBeLessThan(100 * 5 * 26);
       expect(player.y).toBeGreaterThan(400 - 5 * 11);
       expect(player.y).toBeLessThan(400 - 5 * 9);
+
+      player.stopMoving();
+
+      // should face right by default
+      expect(player.getShape().angle).toEqual(0);
+      expect(player.isFacingLeft).toBeFalsy();
+
+      // have the player face left
+      player.faceLeft();
+      expect(player.getShape().angle).toEqual(-180);
+      expect(player.isFacingLeft).toBeTruthy();
+
+      // have the player face right
+      player.faceRight();
+      expect(player.getShape().angle).toEqual(0);
+      expect(player.isFacingLeft).toBeFalsy();
     },
     1000 * 30,
   );
