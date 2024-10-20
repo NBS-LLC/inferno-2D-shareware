@@ -61,8 +61,7 @@ describe(Player.name, () => {
         jest.advanceTimersByTime(MS_PER_FRAME);
 
         // the player should now be roughly located at 225,400
-        expect(player.x).toBeGreaterThan(100 + 5 * 24);
-        expect(player.x).toBeLessThan(100 + 5 * 26);
+        expect(player.x).toBeCloseTo(225);
         expect(player.y).toEqual(400);
 
         // move the player up at 5ppf for 10 frames
@@ -75,10 +74,8 @@ describe(Player.name, () => {
         jest.advanceTimersByTime(MS_PER_FRAME);
 
         // the player should now be roughly located at 225,350
-        expect(player.x).toBeGreaterThan(100 + 5 * 24);
-        expect(player.x).toBeLessThan(100 + 5 * 26);
-        expect(player.y).toBeGreaterThan(400 - 5 * 11);
-        expect(player.y).toBeLessThan(400 - 5 * 9);
+        expect(player.x).toBeCloseTo(225);
+        expect(player.y).toBeCloseTo(350);
 
         // move the player down and left at 5ppf for 10 frames
         for (let n = 1; n <= 10; n++) {
@@ -91,10 +88,8 @@ describe(Player.name, () => {
         jest.advanceTimersByTime(MS_PER_FRAME);
 
         // the player should now be roughly located at 175,400
-        expect(player.x).toBeGreaterThan(225 - 5 * 11);
-        expect(player.x).toBeLessThan(225 - 5 * 9);
-        expect(player.y).toBeGreaterThan(350 + 5 * 9);
-        expect(player.y).toBeLessThan(350 + 5 * 11);
+        expect(player.x).toBeCloseTo(175);
+        expect(player.y).toBeCloseTo(400);
 
         // should face right by default
         expect(player.getShape().angle).toEqual(0);
