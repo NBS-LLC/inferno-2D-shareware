@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
-import { Enemy } from "../Enemy";
-import { Player } from "../Player";
+import { Enemy } from "../game-objects/Enemy";
+import { Player } from "../game-objects/Player";
 
 import Key = Phaser.Input.Keyboard.Key;
 import Text = Phaser.GameObjects.Text;
@@ -40,9 +40,9 @@ export class MainScene extends Scene {
     );
     background.fillRect(0, 0, 800, 600);
 
-    this.player = Player.createDefault(this);
+    this.player = new Player(this, 100, 400);
 
-    this.enemy = Enemy.createDefault(this, 700, 400);
+    this.enemy = new Enemy(this, 700, 400);
     this.enemy.faceLeft();
 
     this.playerInput["right"] = this.input.keyboard.addKey("RIGHT");

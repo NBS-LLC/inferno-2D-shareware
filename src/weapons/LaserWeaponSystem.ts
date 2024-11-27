@@ -1,4 +1,4 @@
-import { Weapon } from "../Weapon";
+import { Weapon } from "./Weapon";
 
 export class LaserWeaponSystem
   extends Phaser.GameObjects.Group
