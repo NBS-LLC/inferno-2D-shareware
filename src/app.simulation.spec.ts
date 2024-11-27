@@ -1,8 +1,8 @@
 import "@geckos.io/phaser-on-nodejs";
 import { describe, expect, jest, test } from "@jest/globals";
 import { Game, Scene } from "phaser";
-import { Enemy } from "./Enemy";
-import { Player } from "./Player";
+import { Enemy } from "./game-objects/Enemy";
+import { Player } from "./game-objects/Player";
 
 window.focus = jest.fn();
 
@@ -34,8 +34,8 @@ let player: Player;
 let enemy: Enemy;
 
 function create(this: Scene) {
-  player = Player.createDefault(this);
-  enemy = Enemy.createDefault(this, 700, 400);
+  player = new Player(this, 100, 400);
+  enemy = new Enemy(this, 700, 400);
 }
 
 jest.useFakeTimers();
@@ -92,19 +92,19 @@ describe(Player.name, () => {
         expect(player.y).toBeCloseTo(400);
 
         // should face right by default
-        expect(player.getShape().angle).toEqual(0);
+        expect(player.angle).toEqual(0);
         expect(player.isFacingLeft).toBeFalsy();
 
         // have the player face left
         player.faceLeft();
         jest.advanceTimersByTime(MS_PER_FRAME);
-        expect(player.getShape().angle).toEqual(-180);
+        expect(player.angle).toEqual(-180);
         expect(player.isFacingLeft).toBeTruthy();
 
         // have the player face right
         player.faceRight();
         jest.advanceTimersByTime(MS_PER_FRAME);
-        expect(player.getShape().angle).toEqual(0);
+        expect(player.angle).toEqual(0);
         expect(player.isFacingLeft).toBeFalsy();
       },
       1000 * 30,
@@ -126,15 +126,12 @@ describe(Player.name, () => {
 
       // the laser should be roughly 600,400: no collision
       jest.advanceTimersByTime(50 * MS_PER_FRAME);
-      expect(enemy.getShape().active).toBeTruthy();
+      expect(enemy.active).toBeTruthy();
 
       // the laser should be roughly 700,400: collision with enemy
       jest.advanceTimersByTime(10 * MS_PER_FRAME);
-      expect(enemy.getShape().active).toBeFalsy();
-      expect(enemy.getShape().body).toBeUndefined();
-
-      // BUG: getBody() will hold onto a destroyed game object's body
-      // TODO: expect(enemy.getBody()).toBeUndefined();
+      expect(enemy.active).toBeFalsy();
+      expect(enemy.body).toBeUndefined();
     });
   });
 });
