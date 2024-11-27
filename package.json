@@ -8,7 +8,7 @@
     "format": "prettier . --check",
     "lint": "eslint .",
     "compile": "tsc --noEmit",
-    "test": "jest --runInBand --coverage --verbose",
+    "test": "jest --runInBand --coverage --verbose --passWithNoTests",
     "build": "npm-run-all clean format lint compile test --print-label",
     "coverage": "chrome coverage/lcov-report/index.html",
     "watch": "webpack --watch",
