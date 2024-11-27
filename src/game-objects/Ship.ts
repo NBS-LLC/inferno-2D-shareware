@@ -1,6 +1,10 @@
 import { GameObjects, Scene } from "phaser";
+import { EmptyWeaponSystem } from "../weapons/EmptyWeaponSystem";
+import { Weapon } from "../weapons/Weapon";
 
 export abstract class Ship extends GameObjects.Polygon {
+  private primaryWeapon: Weapon = new EmptyWeaponSystem();
+
   constructor(scene: Scene, x: number, y: number, vertices: number[][]) {
     // 0,0 is left,top corner of the screen
     // Positive x = right
@@ -42,6 +46,18 @@ export abstract class Ship extends GameObjects.Polygon {
 
   get isFacingLeft() {
     return Math.abs(this.angle) === 180;
+  }
+
+  attachPrimaryWeapon(weapon: Weapon) {
+    this.primaryWeapon = weapon;
+  }
+
+  firePrimaryWeapon() {
+    this.primaryWeapon.fire(
+      this.isFacingLeft ? this.x - 20 : this.x + 20,
+      this.y,
+      this.isFacingLeft ? -10 : 10,
+    );
   }
 }
 
