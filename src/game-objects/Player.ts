@@ -16,4 +16,8 @@ export class Player extends Ship {
 
     this.attachPrimaryWeapon(new LaserWeaponSystem(this.scene));
   }
+
+  update(_time: number, _delta: number): void {
+    return; // Does nothing, for now.
+  }
 }
