@@ -1,8 +1,8 @@
 import { Scene } from "phaser";
-import { Ship } from "./Ship";
-import { Weapon } from "../weapons/Weapon";
 import { EmptyWeaponSystem } from "../weapons/EmptyWeaponSystem";
 import { LaserWeaponSystem } from "../weapons/LaserWeaponSystem";
+import { Weapon } from "../weapons/Weapon";
+import { Ship } from "./Ship";
 
 export class Enemy extends Ship {
   private primaryWeapon: Weapon = new EmptyWeaponSystem();

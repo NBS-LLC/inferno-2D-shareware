@@ -1,8 +1,8 @@
 import { Scene } from "phaser";
-import { Ship } from "./Ship";
-import { Weapon } from "../weapons/Weapon";
 import { EmptyWeaponSystem } from "../weapons/EmptyWeaponSystem";
 import { LaserWeaponSystem } from "../weapons/LaserWeaponSystem";
+import { Weapon } from "../weapons/Weapon";
+import { Ship } from "./Ship";
 
 export class Player extends Ship {
   private primaryWeapon: Weapon = new EmptyWeaponSystem();
@@ -21,7 +21,7 @@ export class Player extends Ship {
 
     super(scene, x, y, playerVertices);
 
-    this.setFillStyle(Phaser.Display.Color.GetColor(110, 110, 110))
+    this.setFillStyle(Phaser.Display.Color.GetColor(110, 110, 110));
 
     this.attachPrimaryWeapon(new LaserWeaponSystem(this.scene));
   }
