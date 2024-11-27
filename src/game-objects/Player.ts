@@ -8,18 +8,13 @@ export class Player extends Ship {
   private primaryWeapon: Weapon = new EmptyWeaponSystem();
 
   constructor(scene: Scene, x: number, y: number) {
-    // 0,0 is left,top corner of the screen
-    // Positive x = right
-    // Positive y = down
-    // Vertices need to be clockwise
-
-    const playerVertices = [
+    const vertices = [
       [0, 0],
       [40, 10],
       [0, 20],
     ];
 
-    super(scene, x, y, playerVertices);
+    super(scene, x, y, vertices);
 
     this.setFillStyle(Phaser.Display.Color.GetColor(110, 110, 110));
 

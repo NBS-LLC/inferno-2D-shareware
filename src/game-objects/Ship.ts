@@ -1,8 +1,13 @@
 import { GameObjects, Scene } from "phaser";
 
 export abstract class Ship extends GameObjects.Polygon {
-  constructor(scene: Scene, x: number, y: number, points: number[][]) {
-    super(scene, x, y, points);
+  constructor(scene: Scene, x: number, y: number, vertices: number[][]) {
+    // 0,0 is left,top corner of the screen
+    // Positive x = right
+    // Positive y = down
+    // Vertices need to be clockwise
+
+    super(scene, x, y, vertices);
     this.scene.add.existing(this);
     this.scene.matter.add.gameObject(this);
   }

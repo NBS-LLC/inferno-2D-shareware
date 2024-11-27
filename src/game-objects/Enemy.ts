@@ -8,11 +8,6 @@ export class Enemy extends Ship {
   private primaryWeapon: Weapon = new EmptyWeaponSystem();
 
   constructor(scene: Scene, x: number, y: number) {
-    // 0,0 is left,top corner of the screen
-    // Positive x = right
-    // Positive y = down
-    // Vertices need to be clockwise
-
     const vertices = [
       [0, 0],
       [40, 0],
