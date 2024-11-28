@@ -114,6 +114,7 @@ describe(Player.name, () => {
     test("Weapon System", async () => {
       new Game(config);
       jest.advanceTimersByTime(MS_PER_FRAME);
+      player.update(MS_PER_FRAME, MS_PER_FRAME);
 
       // the player was added to the scene at: 100,400
       expect(player.x).toEqual(100);
@@ -128,10 +129,12 @@ describe(Player.name, () => {
 
       // the laser should be roughly 600,400: no collision
       jest.advanceTimersByTime(50 * MS_PER_FRAME);
+      player.update(50 * MS_PER_FRAME, MS_PER_FRAME);
       expect(enemy.active).toBeTruthy();
 
       // the laser should be roughly 700,400: collision with enemy
       jest.advanceTimersByTime(10 * MS_PER_FRAME);
+      player.update(10 * MS_PER_FRAME, MS_PER_FRAME);
       expect(enemy.active).toBeFalsy();
       expect(enemy.body).toBeUndefined();
     });
@@ -146,9 +149,9 @@ describe(Player.name, () => {
       expect(enemy.getVelocity()).toEqual({ x: 0, y: 0 });
 
       // simulate 5 seconds worth of idle state
-      for (let n = 0; n < FPS * 5; n++) {
+      for (let frame = 1; frame <= FPS * 5; frame++) {
         jest.advanceTimersByTime(MS_PER_FRAME);
-        enemy.update(MS_PER_FRAME * (n + 1), MS_PER_FRAME);
+        enemy.update(frame * MS_PER_FRAME, MS_PER_FRAME);
 
         expect(enemy.getVelocity()).not.toEqual({ x: 0, y: 0 });
         expect(enemy.x).toBeCloseTo(originX, 30);
