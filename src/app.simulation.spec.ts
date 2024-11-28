@@ -154,6 +154,8 @@ describe(Player.name, () => {
         enemy.update(frame * MS_PER_FRAME, MS_PER_FRAME);
 
         expect(enemy.getVelocity()).not.toEqual({ x: 0, y: 0 });
+
+        // TODO: 30 is arbitrary
         expect(enemy.x).toBeCloseTo(originX, 30);
         expect(enemy.y).toBeCloseTo(originY, 30);
       }

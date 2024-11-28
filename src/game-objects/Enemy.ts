@@ -42,6 +42,7 @@ export class Enemy extends Ship {
       this.updateDelay = Phaser.Math.RND.between(50, 150);
       this.setSpeed(0.25);
 
+      // TODO: might be easier / deterministic to define a static bounding box around the origin
       if (this.x - this.originX <= this.getSpeed() * -3) {
         this.moveRight();
       } else if (this.x - this.originX >= this.getSpeed() * 3) {
