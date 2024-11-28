@@ -28,7 +28,7 @@ export class Enemy extends Ship {
   }
 
   update(time: number, _delta: number): void {
-    if (!this.isAlive) {
+    if (!this.active) {
       return;
     }
 

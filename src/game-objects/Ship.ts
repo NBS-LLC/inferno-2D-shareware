@@ -27,10 +27,6 @@ export abstract class Ship extends GameObjects.Polygon {
     this.speed = speed;
   }
 
-  get isAlive() {
-    return this.body != null || undefined;
-  }
-
   stopMoving() {
     this.setVelocity(0, 0);
   }
@@ -68,6 +64,7 @@ export abstract class Ship extends GameObjects.Polygon {
   }
 
   firePrimaryWeapon() {
+    // BUG: when the ship is arbitrarily rotated (collision?), facing based firing breaks
     this.primaryWeapon.fire(
       this.isFacingLeft ? this.x - 20 : this.x + 20,
       this.y,

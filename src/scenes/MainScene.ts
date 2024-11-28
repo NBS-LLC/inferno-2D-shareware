@@ -68,7 +68,7 @@ export class MainScene extends Scene {
     this.fpsText.setText(this.debugging ? this.getFPSDetails() : "");
     this.pointerText.setText(this.debugging ? this.getPointerDetails() : "");
 
-    if (!this.player.isAlive) {
+    if (!this.player.active) {
       return;
     }
 
