@@ -64,7 +64,14 @@ export class MainScene extends Scene {
     });
   }
 
-  update() {
+  update(time: number, delta: number) {
+    this.fpsText.setText(this.debugging ? this.getFPSDetails() : "");
+    this.pointerText.setText(this.debugging ? this.getPointerDetails() : "");
+
+    if (!this.player.active) {
+      return;
+    }
+
     this.player.stopMoving();
 
     if (this.playerInput["right"].isDown) {
@@ -95,8 +102,7 @@ export class MainScene extends Scene {
       this.player.firePrimaryWeapon();
     }
 
-    this.fpsText.setText(this.debugging ? this.getFPSDetails() : "");
-    this.pointerText.setText(this.debugging ? this.getPointerDetails() : "");
+    this.enemy.update(time, delta);
   }
 
   private handleRestart() {

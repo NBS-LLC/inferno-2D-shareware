@@ -6,7 +6,8 @@ import { Player } from "./game-objects/Player";
 
 window.focus = jest.fn();
 
-const MS_PER_FRAME = 1000 / 60;
+const FPS = 60;
+const MS_PER_FRAME = 1000 / FPS;
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.HEADLESS,
@@ -23,6 +24,7 @@ const config: Phaser.Types.Core.GameConfig = {
     },
   },
   fps: {
+    // Keeps the simulation (update per frame) and matter consistent (pixels per frame)
     forceSetTimeOut: true,
   },
   scene: {
@@ -109,9 +111,11 @@ describe(Player.name, () => {
       },
       1000 * 30,
     );
+
     test("Weapon System", async () => {
       new Game(config);
       jest.advanceTimersByTime(MS_PER_FRAME);
+      player.update(MS_PER_FRAME, MS_PER_FRAME);
 
       // the player was added to the scene at: 100,400
       expect(player.x).toEqual(100);
@@ -126,12 +130,51 @@ describe(Player.name, () => {
 
       // the laser should be roughly 600,400: no collision
       jest.advanceTimersByTime(50 * MS_PER_FRAME);
+      player.update(50 * MS_PER_FRAME, MS_PER_FRAME);
       expect(enemy.active).toBeTruthy();
 
       // the laser should be roughly 700,400: collision with enemy
       jest.advanceTimersByTime(10 * MS_PER_FRAME);
+      player.update(10 * MS_PER_FRAME, MS_PER_FRAME);
       expect(enemy.active).toBeFalsy();
       expect(enemy.body).toBeUndefined();
+    });
+
+    test("Enemy Idle State", async () => {
+      new Game(config);
+      jest.advanceTimersByTime(MS_PER_FRAME);
+
+      const originX = enemy.x;
+      const originY = enemy.y;
+
+      expect(enemy.getVelocity()).toEqual({ x: 0, y: 0 });
+
+      // simulate 5 seconds worth of idle state
+      for (let frame = 1; frame <= FPS * 5; frame++) {
+        jest.advanceTimersByTime(MS_PER_FRAME);
+        enemy.update(frame * MS_PER_FRAME, MS_PER_FRAME);
+
+        // tolerance + (speed * max_idle_delay_frames)
+        const precision = 3 + 0.25 * 10;
+
+        expect(enemy.getVelocity()).not.toEqual({ x: 0, y: 0 });
+        expect(enemy.x).toBeCloseTo(originX, precision);
+        expect(enemy.y).toBeCloseTo(originY, precision);
+      }
+    });
+
+    test("Enemy Destruction", () => {
+      new Game(config);
+      jest.advanceTimersByTime(MS_PER_FRAME);
+
+      expect(enemy.active).toBeTruthy();
+
+      enemy.destroy();
+      jest.advanceTimersByTime(MS_PER_FRAME);
+      // update must handle destruction gracefully
+      enemy.update(MS_PER_FRAME, MS_PER_FRAME);
+
+      expect(enemy.active).toBeFalsy();
     });
   });
 });

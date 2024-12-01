@@ -3,6 +3,7 @@ import { EmptyWeaponSystem } from "../weapons/EmptyWeaponSystem";
 import { Weapon } from "../weapons/Weapon";
 
 export abstract class Ship extends GameObjects.Polygon {
+  private speed = 5;
   private primaryWeapon: Weapon = new EmptyWeaponSystem();
 
   constructor(scene: Scene, x: number, y: number, vertices: number[][]) {
@@ -16,24 +17,34 @@ export abstract class Ship extends GameObjects.Polygon {
     this.scene.matter.add.gameObject(this);
   }
 
+  abstract update(time: number, delta: number): void;
+
+  getSpeed() {
+    return this.speed;
+  }
+
+  setSpeed(speed: number) {
+    this.speed = speed;
+  }
+
   stopMoving() {
     this.setVelocity(0, 0);
   }
 
   moveUp() {
-    this.setVelocityY(-5);
+    this.setVelocityY(this.getSpeed() * -1);
   }
 
   moveDown() {
-    this.setVelocityY(5);
+    this.setVelocityY(this.getSpeed());
   }
 
   moveLeft() {
-    this.setVelocityX(-5);
+    this.setVelocityX(this.getSpeed() * -1);
   }
 
   moveRight() {
-    this.setVelocityX(5);
+    this.setVelocityX(this.getSpeed());
   }
 
   faceLeft() {
@@ -53,6 +64,7 @@ export abstract class Ship extends GameObjects.Polygon {
   }
 
   firePrimaryWeapon() {
+    // BUG: when the ship is arbitrarily rotated (collision?), facing based firing breaks
     this.primaryWeapon.fire(
       this.isFacingLeft ? this.x - 20 : this.x + 20,
       this.y,
