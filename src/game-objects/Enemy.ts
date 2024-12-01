@@ -5,7 +5,7 @@ import { Ship } from "./Ship";
 export class Enemy extends Ship {
   private updateState: "idle" | "engage" = "idle";
   private updateTime = 0;
-  private updateDelay = 2000;
+  private updateDelay = 0;
 
   readonly originX: number;
   readonly originY: number;
@@ -33,7 +33,7 @@ export class Enemy extends Ship {
     }
 
     const elapsed = time - this.updateTime;
-    if (time > this.updateDelay && elapsed < this.updateDelay) {
+    if (elapsed < this.updateDelay) {
       return;
     }
     this.updateTime = time;
