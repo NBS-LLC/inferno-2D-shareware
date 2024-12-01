@@ -1,17 +1,13 @@
 import { Scene } from "phaser";
 import { Enemy } from "../game-objects/Enemy";
-import { Player } from "../game-objects/Player";
-
-import Key = Phaser.Input.Keyboard.Key;
-import Text = Phaser.GameObjects.Text;
+import { Player, PlayerInput } from "../game-objects/Player";
 
 export class MainScene extends Scene {
   private debugging = false;
-  private fpsText: Text;
-  private pointerText: Text;
+  private fpsText: Phaser.GameObjects.Text;
+  private pointerText: Phaser.GameObjects.Text;
 
   private player: Player;
-  private playerInput: { [key: string]: Key } = {};
   private enemy: Enemy;
 
   constructor() {
@@ -40,18 +36,19 @@ export class MainScene extends Scene {
     );
     background.fillRect(0, 0, 800, 600);
 
-    this.player = new Player(this, 100, 400);
+    const playerInput: PlayerInput = {};
+    playerInput["right"] = this.input.keyboard.addKey("RIGHT");
+    playerInput["left"] = this.input.keyboard.addKey("LEFT");
+    playerInput["up"] = this.input.keyboard.addKey("UP");
+    playerInput["down"] = this.input.keyboard.addKey("DOWN");
+    playerInput["face-left"] = this.input.keyboard.addKey("A");
+    playerInput["face-right"] = this.input.keyboard.addKey("D");
+    playerInput["fire-primary"] = this.input.keyboard.addKey("SPACE");
+
+    this.player = new Player(this, 100, 400, playerInput);
 
     this.enemy = new Enemy(this, 700, 400);
     this.enemy.faceLeft();
-
-    this.playerInput["right"] = this.input.keyboard.addKey("RIGHT");
-    this.playerInput["left"] = this.input.keyboard.addKey("LEFT");
-    this.playerInput["up"] = this.input.keyboard.addKey("UP");
-    this.playerInput["down"] = this.input.keyboard.addKey("DOWN");
-    this.playerInput["face-left"] = this.input.keyboard.addKey("A");
-    this.playerInput["face-right"] = this.input.keyboard.addKey("D");
-    this.playerInput["fire-primary"] = this.input.keyboard.addKey("SPACE");
 
     this.fpsText = this.add.text(16, 32, "", {
       fontSize: "16px",
@@ -68,40 +65,7 @@ export class MainScene extends Scene {
     this.fpsText.setText(this.debugging ? this.getFPSDetails() : "");
     this.pointerText.setText(this.debugging ? this.getPointerDetails() : "");
 
-    if (!this.player.active) {
-      return;
-    }
-
-    this.player.stopMoving();
-
-    if (this.playerInput["right"].isDown) {
-      this.player.moveRight();
-    }
-
-    if (this.playerInput["left"].isDown) {
-      this.player.moveLeft();
-    }
-
-    if (this.playerInput["up"].isDown) {
-      this.player.moveUp();
-    }
-
-    if (this.playerInput["down"].isDown) {
-      this.player.moveDown();
-    }
-
-    if (this.playerInput["face-left"].isDown) {
-      this.player.faceLeft();
-    }
-
-    if (this.playerInput["face-right"].isDown) {
-      this.player.faceRight();
-    }
-
-    if (this.playerInput["fire-primary"].isDown) {
-      this.player.firePrimaryWeapon();
-    }
-
+    this.player.update(time, delta);
     this.enemy.update(time, delta);
   }
 

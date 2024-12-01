@@ -36,7 +36,7 @@ let player: Player;
 let enemy: Enemy;
 
 function create(this: Scene) {
-  player = new Player(this, 100, 400);
+  player = new Player(this, 100, 400, {});
   enemy = new Enemy(this, 700, 400);
 }
 
