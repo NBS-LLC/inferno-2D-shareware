@@ -154,11 +154,12 @@ describe(Player.name, () => {
         jest.advanceTimersByTime(MS_PER_FRAME);
         enemy.update(frame * MS_PER_FRAME, MS_PER_FRAME);
 
-        expect(enemy.getVelocity()).not.toEqual({ x: 0, y: 0 });
+        // tolerance + (speed * max_idle_delay_frames)
+        const precision = 3 + 0.25 * 10;
 
-        // TODO: 30 is arbitrary
-        expect(enemy.x).toBeCloseTo(originX, 30);
-        expect(enemy.y).toBeCloseTo(originY, 30);
+        expect(enemy.getVelocity()).not.toEqual({ x: 0, y: 0 });
+        expect(enemy.x).toBeCloseTo(originX, precision);
+        expect(enemy.y).toBeCloseTo(originY, precision);
       }
     });
 

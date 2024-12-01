@@ -39,29 +39,42 @@ export class Enemy extends Ship {
     this.updateTime = time;
 
     if (this.updateState == "idle") {
-      this.updateDelay = Phaser.Math.RND.between(50, 150);
+      const tolerance = 3;
+
+      // Introduce a random delay of ~5 to ~10 frames
+      this.updateDelay = Phaser.Math.RND.between(80, 160);
       this.setSpeed(0.25);
 
-      // TODO: might be easier / deterministic to define a static bounding box around the origin
-      if (this.x - this.originX <= this.getSpeed() * -3) {
+      // Pick a random movement direction
+      let movement = Phaser.Math.RND.pick([
+        this.moveUp,
+        this.moveDown,
+        this.moveLeft,
+        this.moveRight,
+      ]);
+
+      // Unless we've already moved too far (outside the tolerance)
+      if (this.x - this.originX <= tolerance * -1) {
         this.moveRight();
-      } else if (this.x - this.originX >= this.getSpeed() * 3) {
+        movement = null;
+      } else if (this.x - this.originX >= tolerance) {
         this.moveLeft();
-      } else if (this.y - this.originY <= this.getSpeed() * -3) {
-        this.moveDown();
-      } else if (this.y - this.originY >= this.getSpeed() * 3) {
-        this.moveUp();
-      } else {
-        const movement = Phaser.Math.RND.pick([
-          this.moveUp,
-          this.moveDown,
-          this.moveLeft,
-          this.moveRight,
-        ]);
-        movement.bind(this)();
+        movement = null;
       }
 
-      return;
+      // In which case we try to get back to the origin
+      if (this.y - this.originY <= tolerance * -1) {
+        this.moveDown();
+        movement = null;
+      } else if (this.y - this.originY >= tolerance) {
+        this.moveUp();
+        movement = null;
+      }
+
+      // If we've moved too far, the random movement pick will be null
+      if (movement) {
+        movement.bind(this)();
+      }
     }
   }
 }
