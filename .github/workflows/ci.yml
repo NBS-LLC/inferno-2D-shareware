@@ -17,5 +17,14 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Format
+        run: npm run format
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check
+        run: npm run check
+
+      - name: Test
+        run: npm run test
