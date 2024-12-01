@@ -24,6 +24,7 @@ const config: Phaser.Types.Core.GameConfig = {
     },
   },
   fps: {
+    // Keeps the simulation (update per frame) and matter consistent (pixels per frame)
     forceSetTimeOut: true,
   },
   scene: {
