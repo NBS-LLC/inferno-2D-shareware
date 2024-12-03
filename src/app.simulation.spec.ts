@@ -2,7 +2,7 @@ import "@geckos.io/phaser-on-nodejs";
 import { describe, expect, jest, test } from "@jest/globals";
 import { Game, Scene } from "phaser";
 import { Enemy } from "./game-objects/Enemy";
-import { Player } from "./game-objects/Player";
+import { Player, PlayerInput } from "./game-objects/Player";
 
 window.focus = jest.fn();
 
@@ -36,7 +36,7 @@ let player: Player;
 let enemy: Enemy;
 
 function create(this: Scene) {
-  player = new Player(this, 100, 400);
+  player = new Player(this, 100, 400, {});
   enemy = new Enemy(this, 700, 400);
 }
 
@@ -176,5 +176,115 @@ describe(Player.name, () => {
 
       expect(enemy.active).toBeFalsy();
     });
+
+    test("Player Destruction", () => {
+      new Game(config);
+      jest.advanceTimersByTime(MS_PER_FRAME);
+
+      expect(player.active).toBeTruthy();
+
+      player.destroy();
+      jest.advanceTimersByTime(MS_PER_FRAME);
+      // update must handle destruction gracefully
+      player.update(MS_PER_FRAME, MS_PER_FRAME);
+
+      expect(player.active).toBeFalsy();
+    });
+
+    test("Player Input Mapping", () => {
+      const game = new Game(config);
+      const scene = game.scene.getAt(0);
+
+      const playerInput: PlayerInput = {};
+      playerInput["right"] = scene.input.keyboard.addKey("RIGHT");
+      playerInput["left"] = scene.input.keyboard.addKey("LEFT");
+      playerInput["up"] = scene.input.keyboard.addKey("UP");
+      playerInput["down"] = scene.input.keyboard.addKey("DOWN");
+      playerInput["face-left"] = scene.input.keyboard.addKey("A");
+      playerInput["face-right"] = scene.input.keyboard.addKey("D");
+      playerInput["fire-primary"] = scene.input.keyboard.addKey("SPACE");
+
+      const myPlayer = new Player(scene, 200, 200, playerInput);
+      expect(myPlayer.x).toBe(200);
+      expect(myPlayer.y).toBe(200);
+
+      resetPlayerInput(playerInput);
+      playerInput["right"].isDown = true;
+      myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
+      jest.advanceTimersByTime(MS_PER_FRAME);
+      expect(myPlayer.x).toBeCloseTo(205, 1);
+      expect(myPlayer.y).toBe(200);
+
+      resetPlayerInput(playerInput);
+      playerInput["left"].isDown = true;
+      myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
+      jest.advanceTimersByTime(MS_PER_FRAME);
+      expect(myPlayer.x).toBeCloseTo(200, 1);
+      expect(myPlayer.y).toBe(200);
+
+      resetPlayerInput(playerInput);
+      playerInput["up"].isDown = true;
+      myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
+      jest.advanceTimersByTime(MS_PER_FRAME);
+      expect(myPlayer.x).toBeCloseTo(200, 1);
+      expect(myPlayer.y).toBeCloseTo(195, 1);
+
+      resetPlayerInput(playerInput);
+      playerInput["down"].isDown = true;
+      myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
+      jest.advanceTimersByTime(MS_PER_FRAME);
+      expect(myPlayer.x).toBeCloseTo(200, 1);
+      expect(myPlayer.y).toBeCloseTo(200, 1);
+
+      resetPlayerInput(playerInput);
+      playerInput["up"].isDown = true;
+      playerInput["right"].isDown = true;
+      myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
+      jest.advanceTimersByTime(MS_PER_FRAME);
+      expect(myPlayer.x).toBeCloseTo(205, 1);
+      expect(myPlayer.y).toBeCloseTo(195, 1);
+
+      resetPlayerInput(playerInput);
+      playerInput["left"].isDown = true;
+      playerInput["down"].isDown = true;
+      myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
+      jest.advanceTimersByTime(MS_PER_FRAME);
+      expect(myPlayer.x).toBeCloseTo(200, 1);
+      expect(myPlayer.y).toBeCloseTo(200, 1);
+
+      resetPlayerInput(playerInput);
+      playerInput["face-left"].isDown = true;
+      myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
+      jest.advanceTimersByTime(MS_PER_FRAME);
+      expect(myPlayer.isFacingLeft).toBeTruthy();
+
+      resetPlayerInput(playerInput);
+      playerInput["face-right"].isDown = true;
+      myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
+      jest.advanceTimersByTime(MS_PER_FRAME);
+      expect(myPlayer.isFacingLeft).toBeFalsy();
+
+      expect(getActiveLaserAmmo(scene)).toHaveLength(0);
+      resetPlayerInput(playerInput);
+      playerInput["fire-primary"].isDown = true;
+      myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
+      jest.advanceTimersByTime(MS_PER_FRAME);
+      expect(getActiveLaserAmmo(scene)).toHaveLength(1);
+    });
   });
 });
+
+function resetPlayerInput(playerInput: PlayerInput) {
+  for (const inputName in playerInput) {
+    const key = playerInput[inputName];
+    key.isDown = false;
+  }
+}
+
+function getActiveLaserAmmo(scene: Scene) {
+  return scene.children
+    .getAll()
+    .filter(
+      (gameObject) => gameObject.name == "LaserAmmo" && gameObject.active,
+    );
+}

@@ -2,8 +2,17 @@ import { Scene } from "phaser";
 import { LaserWeaponSystem } from "../weapons/LaserWeaponSystem";
 import { Ship } from "./Ship";
 
+export type PlayerInput = {
+  [key: string]: Phaser.Input.Keyboard.Key;
+};
+
 export class Player extends Ship {
-  constructor(scene: Scene, x: number, y: number) {
+  constructor(
+    scene: Scene,
+    x: number,
+    y: number,
+    private playerInput: PlayerInput,
+  ) {
     const vertices = [
       [0, 0],
       [40, 10],
@@ -18,6 +27,38 @@ export class Player extends Ship {
   }
 
   update(_time: number, _delta: number): void {
-    return; // Does nothing, for now.
+    if (!this.active) {
+      return;
+    }
+
+    this.stopMoving();
+
+    if (this.playerInput["right"]?.isDown) {
+      this.moveRight();
+    }
+
+    if (this.playerInput["left"]?.isDown) {
+      this.moveLeft();
+    }
+
+    if (this.playerInput["up"]?.isDown) {
+      this.moveUp();
+    }
+
+    if (this.playerInput["down"]?.isDown) {
+      this.moveDown();
+    }
+
+    if (this.playerInput["face-left"]?.isDown) {
+      this.faceLeft();
+    }
+
+    if (this.playerInput["face-right"]?.isDown) {
+      this.faceRight();
+    }
+
+    if (this.playerInput["fire-primary"]?.isDown) {
+      this.firePrimaryWeapon();
+    }
   }
 }
