@@ -11,7 +11,7 @@ export class Player extends Ship {
     scene: Scene,
     x: number,
     y: number,
-    readonly playerInput: PlayerInput,
+    private playerInput: PlayerInput,
   ) {
     const vertices = [
       [0, 0],
