@@ -5,7 +5,7 @@ export class LaserWeaponSystem
   implements Weapon
 {
   private fireDelay = 1000 * 0.25;
-  private nextFireAt: number;
+  private nextFireAt = 0;
 
   constructor(scene: Phaser.Scene) {
     super(scene);
@@ -17,8 +17,6 @@ export class LaserWeaponSystem
       visible: false,
       key: "laser",
     });
-
-    this.delayFire();
   }
 
   fire(x: number, y: number, velocity: number) {
@@ -52,6 +50,8 @@ class LaserAmmo extends Phaser.GameObjects.Line {
       0,
       Phaser.Display.Color.GetColor(255, 255, 255),
     );
+
+    this.setName(LaserAmmo.name);
 
     this.setLineWidth(2, 1);
 
