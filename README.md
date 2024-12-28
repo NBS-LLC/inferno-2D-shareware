@@ -4,12 +4,12 @@ A 2D Platformer Tribute to 90s Descent
 
 ## Prerequisites
 
-- [NVM](https://github.com/nvm-sh/nvm)
+- [ASDF](https://asdf-vm.com/)
 
 ## Build
 
 ```bash
-> nvm use
+> asdf install
 > npm install
 > npm start
 ```
