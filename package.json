@@ -10,7 +10,7 @@
     "check": "tsc --noEmit",
     "test": "jest --runInBand --coverage --verbose",
     "all": "npm-run-all clean format lint check test --print-label",
-    "coverage": "chrome coverage/lcov-report/index.html",
+    "coverage": "./scripts/chrome.mjs coverage/lcov-report/index.html",
     "watch": "webpack --watch",
     "serve": "webpack-dev-server",
     "start": "npm-run-all --parallel watch serve --print-label"
