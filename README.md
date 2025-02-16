@@ -37,3 +37,9 @@ Keyboard Shortcuts:
 
 - backtick: display debug details, including frames per second
 - esc: restart the game
+
+## Test
+
+```bash
+> npm run all
+```

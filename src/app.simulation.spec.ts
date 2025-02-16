@@ -41,6 +41,7 @@ function create(this: Scene) {
 }
 
 jest.useFakeTimers();
+jest.spyOn(console, "log").mockImplementation(() => {});
 
 describe(Player.name, () => {
   describe("Integration", () => {
