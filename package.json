@@ -9,11 +9,11 @@
     "lint": "eslint .",
     "check": "tsc --noEmit",
     "test": "jest --runInBand --coverage --verbose",
-    "build": "npm-run-all clean format lint check test --print-label",
+    "all": "npm-run-all clean format lint check test --print-label",
     "coverage": "chrome coverage/lcov-report/index.html",
     "watch": "webpack --watch",
     "serve": "webpack-dev-server",
-    "start": "npm-run-all build --parallel watch serve --print-label"
+    "start": "npm-run-all --parallel watch serve --print-label"
   },
   "author": "Nick Derevjanik",
   "license": "GPL-3.0-only",
