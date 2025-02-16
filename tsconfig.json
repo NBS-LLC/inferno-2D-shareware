@@ -3,7 +3,5 @@
     "module": "CommonJS",
     "sourceMap": true,
     "target": "ES6"
-  },
-  "exclude": ["node_modules"],
-  "include": ["src/**/*"]
+  }
 }
