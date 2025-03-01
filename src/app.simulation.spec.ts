@@ -87,6 +87,11 @@ describe(Player.name, () => {
           jest.advanceTimersByTime(MS_PER_FRAME);
         }
 
+        // TODO: remove workaround
+        if (isVersionGreater(Phaser.VERSION, "3.87.0")) {
+          jest.advanceTimersByTime(MS_PER_FRAME);
+        }
+
         player.stopMoving();
         jest.advanceTimersByTime(MS_PER_FRAME);
 
@@ -288,4 +293,16 @@ function getActiveLaserAmmo(scene: Scene) {
     .filter(
       (gameObject) => gameObject.name == "LaserAmmo" && gameObject.active,
     );
+}
+
+function isVersionGreater(version: string, targetVersion: string): boolean {
+  const versionParts = version.split(".").map(Number);
+  const targetVersionParts = targetVersion.split(".").map(Number);
+
+  for (let i = 0; i < 3; i++) {
+    if (versionParts[i] > targetVersionParts[i]) return true;
+    if (versionParts[i] < targetVersionParts[i]) return false;
+  }
+
+  return false;
 }
