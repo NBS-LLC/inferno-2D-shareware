@@ -1,8 +1,9 @@
 import "@geckos.io/phaser-on-nodejs";
-import { describe, expect, jest, test } from "@jest/globals";
+import { describe, expect, it, jest, test } from "@jest/globals";
 import { Game, Scene } from "phaser";
 import { Enemy } from "./game-objects/Enemy";
 import { Player, PlayerInput } from "./game-objects/Player";
+import { Ship } from "./game-objects/Ship";
 
 window.focus = jest.fn();
 
@@ -43,8 +44,17 @@ function create(this: Scene) {
 jest.useFakeTimers();
 jest.spyOn(console, "log").mockImplementation(() => {});
 
-describe(Player.name, () => {
-  describe("Integration", () => {
+describe("Game", () => {
+  describe(Ship.name, () => {
+    it("should not rotate on collision", () => {
+      new Game(config);
+
+      expect(player.getBody().inertia).toBe(Infinity);
+      expect(enemy.getBody().inertia).toBe(Infinity);
+    });
+  });
+
+  describe("Simulation", () => {
     test(
       "Movement and Position",
       async () => {

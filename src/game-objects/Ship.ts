@@ -1,3 +1,4 @@
+import { BodyType } from "matter";
 import { GameObjects, Scene } from "phaser";
 import { EmptyWeaponSystem } from "../weapons/EmptyWeaponSystem";
 import { Weapon } from "../weapons/Weapon";
@@ -15,9 +16,14 @@ export abstract class Ship extends GameObjects.Polygon {
     super(scene, x, y, vertices);
     this.scene.add.existing(this);
     this.scene.matter.add.gameObject(this);
+    this.scene.matter.body.setInertia(this.getBody(), Infinity);
   }
 
   abstract update(time: number, delta: number): void;
+
+  getBody() {
+    return this.body as BodyType;
+  }
 
   getSpeed() {
     return this.speed;
