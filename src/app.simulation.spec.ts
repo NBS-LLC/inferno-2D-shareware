@@ -51,7 +51,7 @@ describe("Game", () => {
   beforeEach(() => {
     game = new Game(config);
     frameIndex = 0;
-    step();
+    stepFramesBy(1);
   });
 
   describe(Ship.name, () => {
@@ -64,7 +64,7 @@ describe("Game", () => {
       // collide the player into the enemy
       for (let frame = 1; frame <= 120; frame++) {
         player.moveRight();
-        step();
+        stepFramesBy(1);
 
         expect(player.getBody().angle).toEqual(0);
         expect(enemy.getBody().angle).toEqual(0);
@@ -81,11 +81,11 @@ describe("Game", () => {
       // move the player right at 5ppf for 25 frames
       for (let n = 1; n <= 25; n++) {
         player.moveRight();
-        step();
+        stepFramesBy(1);
       }
 
       player.stopMoving();
-      step();
+      stepFramesBy(1);
 
       // the player should now be roughly located at 225,400
       expect(player.x).toBeCloseTo(225);
@@ -94,11 +94,11 @@ describe("Game", () => {
       // move the player up at 5ppf for 10 frames
       for (let n = 1; n <= 10; n++) {
         player.moveUp();
-        step();
+        stepFramesBy(1);
       }
 
       player.stopMoving();
-      step();
+      stepFramesBy(1);
 
       // the player should now be roughly located at 225,350
       expect(player.x).toBeCloseTo(225);
@@ -108,11 +108,11 @@ describe("Game", () => {
       for (let n = 1; n <= 10; n++) {
         player.moveDown();
         player.moveLeft();
-        step();
+        stepFramesBy(1);
       }
 
       player.stopMoving();
-      step();
+      stepFramesBy(1);
 
       // the player should now be roughly located at 175,400
       expect(player.x).toBeCloseTo(175);
@@ -124,13 +124,13 @@ describe("Game", () => {
 
       // have the player face left
       player.faceLeft();
-      step();
+      stepFramesBy(1);
       expect(player.angle).toEqual(-180);
       expect(player.isFacingLeft).toBeTruthy();
 
       // have the player face right
       player.faceRight();
-      step();
+      stepFramesBy(1);
       expect(player.angle).toEqual(0);
       expect(player.isFacingLeft).toBeFalsy();
     });
@@ -147,11 +147,11 @@ describe("Game", () => {
       // fire the player's primary weapon at 10ppf
       player.firePrimaryWeapon();
 
-      step(50);
+      stepFramesBy(50);
       // the laser should be roughly 600,400: no collision
       expect(enemy.active).toBeTruthy();
 
-      step(10);
+      stepFramesBy(10);
       // the laser should be roughly 700,400: collision with enemy
       expect(enemy.active).toBeFalsy();
       expect(enemy.body).toBeUndefined();
@@ -166,7 +166,7 @@ describe("Game", () => {
       // simulate 5 seconds worth of idle state
       for (let frame = 1; frame <= FPS * 5; frame++) {
         enemy.idle();
-        step();
+        stepFramesBy(1);
 
         // tolerance + (speed * max_idle_delay_frames)
         const precision = 3 + 0.25 * 10;
@@ -181,7 +181,7 @@ describe("Game", () => {
       expect(enemy.active).toBeTruthy();
 
       enemy.destroy();
-      step();
+      stepFramesBy(1);
       // update must handle destruction gracefully
       enemy.update(MS_PER_FRAME, MS_PER_FRAME);
 
@@ -192,7 +192,7 @@ describe("Game", () => {
       expect(player.active).toBeTruthy();
 
       player.destroy();
-      step();
+      stepFramesBy(1);
       // update must handle destruction gracefully
       player.update(MS_PER_FRAME, MS_PER_FRAME);
 
@@ -220,28 +220,28 @@ describe("Game", () => {
       resetPlayerInput(playerInput);
       playerInput["right"].isDown = true;
       myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
-      step();
+      stepFramesBy(1);
       expect(myPlayer.x).toBeCloseTo(205, 1);
       expect(myPlayer.y).toBe(200);
 
       resetPlayerInput(playerInput);
       playerInput["left"].isDown = true;
       myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
-      step();
+      stepFramesBy(1);
       expect(myPlayer.x).toBeCloseTo(200, 1);
       expect(myPlayer.y).toBe(200);
 
       resetPlayerInput(playerInput);
       playerInput["up"].isDown = true;
       myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
-      step();
+      stepFramesBy(1);
       expect(myPlayer.x).toBeCloseTo(200, 1);
       expect(myPlayer.y).toBeCloseTo(195, 1);
 
       resetPlayerInput(playerInput);
       playerInput["down"].isDown = true;
       myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
-      step();
+      stepFramesBy(1);
       expect(myPlayer.x).toBeCloseTo(200, 1);
       expect(myPlayer.y).toBeCloseTo(200, 1);
 
@@ -249,7 +249,7 @@ describe("Game", () => {
       playerInput["up"].isDown = true;
       playerInput["right"].isDown = true;
       myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
-      step();
+      stepFramesBy(1);
       expect(myPlayer.x).toBeCloseTo(205, 1);
       expect(myPlayer.y).toBeCloseTo(195, 1);
 
@@ -257,27 +257,27 @@ describe("Game", () => {
       playerInput["left"].isDown = true;
       playerInput["down"].isDown = true;
       myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
-      step();
+      stepFramesBy(1);
       expect(myPlayer.x).toBeCloseTo(200, 1);
       expect(myPlayer.y).toBeCloseTo(200, 1);
 
       resetPlayerInput(playerInput);
       playerInput["face-left"].isDown = true;
       myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
-      step();
+      stepFramesBy(1);
       expect(myPlayer.isFacingLeft).toBeTruthy();
 
       resetPlayerInput(playerInput);
       playerInput["face-right"].isDown = true;
       myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
-      step();
+      stepFramesBy(1);
       expect(myPlayer.isFacingLeft).toBeFalsy();
 
       expect(getActiveLaserAmmo(scene)).toHaveLength(0);
       resetPlayerInput(playerInput);
       playerInput["fire-primary"].isDown = true;
       myPlayer.update(MS_PER_FRAME, MS_PER_FRAME);
-      step();
+      stepFramesBy(1);
       expect(getActiveLaserAmmo(scene)).toHaveLength(1);
     });
   });
@@ -298,7 +298,7 @@ function getActiveLaserAmmo(scene: Scene) {
     );
 }
 
-function step(count = 1) {
+function stepFramesBy(count: number) {
   for (let n = 0; n < count; n++) {
     game.headlessStep(++frameIndex * MS_PER_FRAME, MS_PER_FRAME);
   }
