@@ -55,14 +55,14 @@ describe("Game", () => {
 
   describe(Ship.name, () => {
     it("should not rotate on collision", () => {
-      // if the player is moving right at 5ppf, they'll collide in 120 frames
-      expect(player.x).toEqual(100);
-      expect(enemy.x).toEqual(700);
-      expect(player.getSpeed()).toEqual(5);
+      // position the player above the enemy, with some horizontal overlap
+      player.setPosition(680, 350);
+      enemy.setPosition(700, 400);
+      player.setSpeed(5);
 
       // collide the player into the enemy
-      for (let frame = 1; frame <= 120; frame++) {
-        player.moveRight();
+      for (let frame = 1; frame <= 10; frame++) {
+        player.moveDown();
         stepFramesBy(1);
 
         expect(player.getBody().angle).toEqual(0);
