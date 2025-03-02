@@ -3,7 +3,7 @@ import { LaserWeaponSystem } from "../weapons/LaserWeaponSystem";
 import { Ship } from "./Ship";
 
 export class Enemy extends Ship {
-  private updateState: "idle" | "engage" = "idle";
+  private updateState: "disabled" | "idle" | "engage" = "disabled";
   private updateTime = 0;
   private updateDelay = 0;
 
@@ -25,6 +25,10 @@ export class Enemy extends Ship {
     this.setFillStyle(Phaser.Display.Color.GetColor(200, 110, 110));
 
     this.attachPrimaryWeapon(new LaserWeaponSystem(this.scene));
+  }
+
+  idle() {
+    this.updateState = "idle";
   }
 
   update(time: number, _delta: number): void {
