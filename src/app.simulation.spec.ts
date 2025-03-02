@@ -47,10 +47,29 @@ jest.spyOn(console, "log").mockImplementation(() => {});
 describe("Game", () => {
   describe(Ship.name, () => {
     it("should not rotate on collision", () => {
-      new Game(config);
+      const game = new Game(config);
 
-      expect(player.getBody().inertia).toBe(Infinity);
-      expect(enemy.getBody().inertia).toBe(Infinity);
+      // if the player is moving right at 5ppf, they'll collide in 120 frames
+      expect(player.x).toEqual(100);
+      expect(enemy.x).toEqual(700);
+      expect(player.getSpeed()).toEqual(5);
+
+      let playerRotation = player.getBody().angle;
+      let enemyRotation = enemy.getBody().angle;
+
+      // collide the player into the enemy
+      for (let frame = 1; frame <= 120; frame++) {
+        player.moveRight();
+        game.headlessStep(frame * MS_PER_FRAME, MS_PER_FRAME);
+        player.update(frame * MS_PER_FRAME, MS_PER_FRAME);
+        enemy.update(frame * MS_PER_FRAME, MS_PER_FRAME);
+
+        playerRotation += Math.abs(player.getBody().angle);
+        enemyRotation += Math.abs(enemy.getBody().angle);
+      }
+
+      expect(playerRotation).toEqual(0);
+      expect(enemyRotation).toEqual(0);
     });
   });
 
