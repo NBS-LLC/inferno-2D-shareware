@@ -48,6 +48,7 @@ export class MainScene extends Scene {
     this.player = new Player(this, 100, 400, playerInput);
 
     this.enemy = new Enemy(this, 700, 400);
+    this.enemy.idle();
     this.enemy.faceLeft();
 
     this.fpsText = this.add.text(16, 32, "", {
