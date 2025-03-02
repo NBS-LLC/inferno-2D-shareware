@@ -6,6 +6,7 @@ import { Player, PlayerInput } from "./game-objects/Player";
 import { Ship } from "./game-objects/Ship";
 
 window.focus = jest.fn();
+jest.spyOn(console, "log").mockImplementation(() => {});
 
 const FPS = 60;
 const MS_PER_FRAME = 1000 / FPS;
@@ -44,8 +45,6 @@ function update(time: number, delta: number) {
   player.update(time, delta);
   enemy.update(time, delta);
 }
-
-jest.spyOn(console, "log").mockImplementation(() => {});
 
 describe("Game", () => {
   beforeEach(() => {
