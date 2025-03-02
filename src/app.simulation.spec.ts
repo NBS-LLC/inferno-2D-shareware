@@ -1,5 +1,5 @@
 import "@geckos.io/phaser-on-nodejs";
-import { describe, expect, it, jest, test } from "@jest/globals";
+import { beforeEach, describe, expect, it, jest, test } from "@jest/globals";
 import { Game, Scene } from "phaser";
 import { Enemy } from "./game-objects/Enemy";
 import { Player, PlayerInput } from "./game-objects/Player";
@@ -30,9 +30,12 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   scene: {
     create,
+    update,
   },
 };
 
+let game: Game;
+let frameIndex: number;
 let player: Player;
 let enemy: Enemy;
 
@@ -41,14 +44,23 @@ function create(this: Scene) {
   enemy = new Enemy(this, 700, 400);
 }
 
+function update(time: number, delta: number) {
+  player.update(time, delta);
+  enemy.update(time, delta);
+}
+
 jest.useFakeTimers();
 jest.spyOn(console, "log").mockImplementation(() => {});
 
 describe("Game", () => {
-  describe(Ship.name, () => {
-    it("should not rotate on collision", () => {
-      const game = new Game(config);
+  beforeEach(() => {
+    game = new Game(config);
+    frameIndex = 0;
+    step();
+  });
 
+  describe(Ship.name, () => {
+    it.only("should not rotate on collision", () => {
       // if the player is moving right at 5ppf, they'll collide in 120 frames
       expect(player.x).toEqual(100);
       expect(enemy.x).toEqual(700);
@@ -60,10 +72,7 @@ describe("Game", () => {
       // collide the player into the enemy
       for (let frame = 1; frame <= 120; frame++) {
         player.moveRight();
-        game.headlessStep(frame * MS_PER_FRAME, MS_PER_FRAME);
-        player.update(frame * MS_PER_FRAME, MS_PER_FRAME);
-        enemy.update(frame * MS_PER_FRAME, MS_PER_FRAME);
-
+        step();
         playerRotation += Math.abs(player.getBody().angle);
         enemyRotation += Math.abs(enemy.getBody().angle);
       }
@@ -334,4 +343,8 @@ function isVersionGreater(version: string, targetVersion: string): boolean {
   }
 
   return false;
+}
+
+function step() {
+  game.headlessStep(++frameIndex * MS_PER_FRAME, MS_PER_FRAME);
 }
