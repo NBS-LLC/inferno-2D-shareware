@@ -1,5 +1,6 @@
 import { BodyType } from "matter";
-import { GameObjects, Scene } from "phaser";
+import { GameObjects } from "phaser";
+import { BaseScene } from "../scenes/BaseScene";
 import { EmptyWeaponSystem } from "../weapons/EmptyWeaponSystem";
 import { Weapon } from "../weapons/Weapon";
 
@@ -7,7 +8,7 @@ export abstract class Ship extends GameObjects.Polygon {
   private speed = 5;
   private primaryWeapon: Weapon = new EmptyWeaponSystem();
 
-  constructor(scene: Scene, x: number, y: number, vertices: number[][]) {
+  constructor(scene: BaseScene, x: number, y: number, vertices: number[][]) {
     // 0,0 is left,top corner of the screen
     // Positive x = right
     // Positive y = down
@@ -20,6 +21,10 @@ export abstract class Ship extends GameObjects.Polygon {
   }
 
   abstract update(time: number, delta: number): void;
+
+  getScene() {
+    return this.scene as BaseScene;
+  }
 
   getBody() {
     return this.body as BodyType;

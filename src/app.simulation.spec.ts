@@ -4,12 +4,30 @@ import { Game, Scene } from "phaser";
 import { Enemy } from "./game-objects/Enemy";
 import { Player, PlayerInput } from "./game-objects/Player";
 import { Ship } from "./game-objects/Ship";
+import { BaseScene } from "./scenes/BaseScene";
 
 window.focus = jest.fn();
 jest.spyOn(console, "log").mockImplementation(() => {});
 
 const FPS = 60;
 const MS_PER_FRAME = 1000 / FPS;
+
+let game: Game;
+let frameIndex: number;
+let player: Player;
+let enemy: Enemy;
+
+class SimulationScene extends BaseScene {
+  create(this: BaseScene) {
+    player = new Player(this, 100, 400, {});
+    enemy = new Enemy(this, 700, 400);
+  }
+
+  update(time: number, delta: number) {
+    player.update(time, delta);
+    enemy.update(time, delta);
+  }
+}
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.HEADLESS,
@@ -25,26 +43,8 @@ const config: Phaser.Types.Core.GameConfig = {
       gravity: { x: 0, y: 0 },
     },
   },
-  scene: {
-    create,
-    update,
-  },
+  scene: SimulationScene,
 };
-
-let game: Game;
-let frameIndex: number;
-let player: Player;
-let enemy: Enemy;
-
-function create(this: Scene) {
-  player = new Player(this, 100, 400, {});
-  enemy = new Enemy(this, 700, 400);
-}
-
-function update(time: number, delta: number) {
-  player.update(time, delta);
-  enemy.update(time, delta);
-}
 
 describe("Game", () => {
   beforeEach(() => {
@@ -199,7 +199,7 @@ describe("Game", () => {
     });
 
     test("Player Input Mapping", () => {
-      const scene = game.scene.getAt(0);
+      const scene = game.scene.getAt(0) as BaseScene;
       player.destroy();
       enemy.destroy();
 

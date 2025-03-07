@@ -1,8 +1,8 @@
-import { Scene } from "phaser";
 import { Enemy } from "../game-objects/Enemy";
 import { Player, PlayerInput } from "../game-objects/Player";
+import { BaseScene } from "./BaseScene";
 
-export class MainScene extends Scene {
+export class MainScene extends BaseScene {
   private debugging = false;
   private scoreText: Phaser.GameObjects.Text;
   private fpsText: Phaser.GameObjects.Text;
@@ -80,6 +80,7 @@ export class MainScene extends Scene {
   private handleRestart() {
     this.debugging = false;
     this.scene.restart();
+    this.resetScore();
   }
 
   private getDayGradient(): number[] {
@@ -87,7 +88,8 @@ export class MainScene extends Scene {
   }
 
   private getScoreDetails(): string {
-    return "Score: 0";
+    const currentScore = this.getScorer().getScore();
+    return `Score: ${currentScore}`;
   }
 
   private getFPSDetails(): string {

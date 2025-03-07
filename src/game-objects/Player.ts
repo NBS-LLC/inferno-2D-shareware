@@ -1,4 +1,4 @@
-import { Scene } from "phaser";
+import { BaseScene } from "../scenes/BaseScene";
 import { LaserWeaponSystem } from "../weapons/LaserWeaponSystem";
 import { Ship } from "./Ship";
 
@@ -8,7 +8,7 @@ export type PlayerInput = {
 
 export class Player extends Ship {
   constructor(
-    scene: Scene,
+    scene: BaseScene,
     x: number,
     y: number,
     private playerInput: PlayerInput,

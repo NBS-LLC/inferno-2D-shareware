@@ -1,4 +1,4 @@
-import { Scene } from "phaser";
+import { BaseScene } from "../scenes/BaseScene";
 import { LaserWeaponSystem } from "../weapons/LaserWeaponSystem";
 import { Ship } from "./Ship";
 
@@ -10,7 +10,7 @@ export class Enemy extends Ship {
   readonly originX: number;
   readonly originY: number;
 
-  constructor(scene: Scene, x: number, y: number) {
+  constructor(scene: BaseScene, x: number, y: number) {
     const vertices = [
       [0, 0],
       [40, 0],
@@ -80,5 +80,10 @@ export class Enemy extends Ship {
         movement.bind(this)();
       }
     }
+  }
+
+  destroy(fromScene?: boolean): void {
+    this.getScene().getScorer().addToScore(100);
+    super.destroy(fromScene);
   }
 }
