@@ -83,7 +83,9 @@ export class Enemy extends Ship {
   }
 
   destroy(fromScene?: boolean): void {
-    this.getScene().getScorer().addToScore(100);
+    if (!fromScene) {
+      this.getScene().getScorer().addToScore(100);
+    }
     super.destroy(fromScene);
   }
 }
