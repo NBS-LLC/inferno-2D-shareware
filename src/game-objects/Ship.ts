@@ -22,6 +22,12 @@ export abstract class Ship extends GameObjects.Polygon {
 
   abstract update(time: number, delta: number): void;
 
+  kill(killer: GameObjects.GameObject) {
+    console.info(this, "killed by", killer);
+    this.getScene().getScorer().addToScore(100);
+    this.destroy();
+  }
+
   getScene() {
     return this.scene as BaseScene;
   }

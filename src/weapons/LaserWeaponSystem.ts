@@ -1,3 +1,4 @@
+import { Ship } from "../game-objects/Ship";
 import { Weapon } from "./Weapon";
 
 export class LaserWeaponSystem
@@ -89,17 +90,16 @@ class LaserAmmo extends Phaser.GameObjects.Line {
   onCollision(pair: Phaser.Types.Physics.Matter.MatterCollisionPair) {
     const { bodyA, bodyB } = pair;
 
-    if (bodyA.gameObject instanceof LaserAmmo) {
-      bodyA.gameObject.hide();
-    } else {
-      bodyA.gameObject.destroy();
-    }
-
-    if (bodyB.gameObject instanceof LaserAmmo) {
-      bodyB.gameObject.hide();
-    } else {
-      bodyB.gameObject.destroy();
-    }
+    [bodyA.gameObject, bodyB.gameObject].forEach((gameObject, index) => {
+      const other = index === 0 ? bodyB.gameObject : bodyA.gameObject;
+      if (gameObject instanceof LaserAmmo) {
+        gameObject.hide();
+      } else if (gameObject instanceof Ship) {
+        gameObject.kill(other);
+      } else {
+        gameObject.destroy();
+      }
+    });
   }
 
   private hide() {
