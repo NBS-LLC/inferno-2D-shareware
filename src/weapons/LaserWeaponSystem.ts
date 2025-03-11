@@ -52,7 +52,7 @@ class LaserAmmo extends Phaser.GameObjects.Line {
       Phaser.Display.Color.GetColor(255, 255, 255),
     );
 
-    this.setName(LaserAmmo.name);
+    this.setName(this.constructor.name);
 
     this.setLineWidth(2, 1);
 

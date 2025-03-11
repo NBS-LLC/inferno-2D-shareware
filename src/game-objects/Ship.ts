@@ -15,6 +15,7 @@ export abstract class Ship extends GameObjects.Polygon {
     // Vertices need to be clockwise
 
     super(scene, x, y, vertices);
+    this.setName(this.constructor.name);
     this.scene.add.existing(this);
     this.scene.matter.add.gameObject(this);
     this.scene.matter.body.setInertia(this.getBody(), Infinity);
@@ -23,7 +24,7 @@ export abstract class Ship extends GameObjects.Polygon {
   abstract update(time: number, delta: number): void;
 
   kill(killer: GameObjects.GameObject) {
-    console.info(this, "killed by", killer);
+    console.log(this.name, "killed by", killer.name);
     this.getScene().getScorer().addToScore(100);
     this.destroy();
   }
