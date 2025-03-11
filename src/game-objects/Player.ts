@@ -23,7 +23,7 @@ export class Player extends Ship {
 
     this.setFillStyle(Phaser.Display.Color.GetColor(110, 110, 110));
 
-    this.attachPrimaryWeapon(new LaserWeaponSystem(this.scene));
+    this.attachPrimaryWeapon(new LaserWeaponSystem(this));
   }
 
   update(_time: number, _delta: number): void {

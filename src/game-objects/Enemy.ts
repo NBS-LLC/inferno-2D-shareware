@@ -24,7 +24,7 @@ export class Enemy extends Ship {
 
     this.setFillStyle(Phaser.Display.Color.GetColor(200, 110, 110));
 
-    this.attachPrimaryWeapon(new LaserWeaponSystem(this.scene));
+    this.attachPrimaryWeapon(new LaserWeaponSystem(this));
   }
 
   idle() {
