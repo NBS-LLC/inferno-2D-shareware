@@ -4,6 +4,11 @@ import { BaseScene } from "../scenes/BaseScene";
 import { EmptyWeaponSystem } from "../weapons/EmptyWeaponSystem";
 import { Weapon } from "../weapons/Weapon";
 
+export enum ShipType {
+  Player,
+  Enemy,
+}
+
 export abstract class Ship extends GameObjects.Polygon {
   private speed = 5;
   private primaryWeapon: Weapon = new EmptyWeaponSystem();
@@ -22,10 +27,13 @@ export abstract class Ship extends GameObjects.Polygon {
   }
 
   abstract update(time: number, delta: number): void;
+  abstract getType(): ShipType;
 
   kill(killer: GameObjects.GameObject) {
     console.log(this.name, "killed by", killer.name);
-    this.getScene().getScorer().addToScore(100);
+    if (killer instanceof Ship && killer.getType() === ShipType.Player) {
+      this.getScene().getScorer().addToScore(100);
+    }
     this.destroy();
   }
 

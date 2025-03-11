@@ -1,6 +1,6 @@
 import { BaseScene } from "../scenes/BaseScene";
 import { LaserWeaponSystem } from "../weapons/LaserWeaponSystem";
-import { Ship } from "./Ship";
+import { Ship, ShipType } from "./Ship";
 
 export class Enemy extends Ship {
   private updateState: "disabled" | "idle" | "engage" = "disabled";
@@ -25,6 +25,10 @@ export class Enemy extends Ship {
     this.setFillStyle(Phaser.Display.Color.GetColor(200, 110, 110));
 
     this.attachPrimaryWeapon(new LaserWeaponSystem(this));
+  }
+
+  getType() {
+    return ShipType.Enemy;
   }
 
   idle() {
