@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, jest, test } from "@jest/globals";
 import { Game, Scene } from "phaser";
 import { Enemy } from "./game-objects/Enemy";
 import { Player, PlayerInput } from "./game-objects/Player";
-import { Ship } from "./game-objects/Ship";
+import { Ship, ShipType } from "./game-objects/Ship";
 import { BaseScene } from "./scenes/BaseScene";
 
 window.focus = jest.fn();
@@ -68,6 +68,27 @@ describe("Game", () => {
         expect(player.getBody().angle).toEqual(0);
         expect(enemy.getBody().angle).toEqual(0);
       }
+    });
+  });
+
+  describe(Ship.name, () => {
+    it("has a default level", () => {
+      expect(player.getLevel()).toEqual(1);
+      expect(enemy.getLevel()).toEqual(1);
+    });
+
+    it("can have its level set", () => {
+      player.setLevel(10);
+      enemy.setLevel(2);
+
+      expect(player.getLevel()).toEqual(10);
+      expect(enemy.getLevel()).toEqual(2);
+    });
+  });
+
+  describe(Enemy.name, () => {
+    it("should have a ship type", () => {
+      expect(enemy.getType()).toEqual(ShipType.Enemy);
     });
   });
 

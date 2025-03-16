@@ -35,4 +35,17 @@ describe(Scorer.name, () => {
       ).toBe(data.expectedScore);
     });
   });
+
+  it("is initialized with a score of zero", () => {
+    expect(new Scorer().getScore()).toEqual(0);
+  });
+
+  it("accumulates the score", () => {
+    const scorer = new Scorer();
+    scorer.addToScore(100);
+    scorer.addToScore(20);
+    scorer.addToScore(3);
+
+    expect(scorer.getScore()).toEqual(123);
+  });
 });
