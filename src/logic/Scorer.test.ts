@@ -3,6 +3,7 @@ import { Scorer } from "./Scorer";
 
 describe(Scorer.name, () => {
   describe(Scorer.calculateScore.name, () => {
+    // prettier-ignore
     const testData = [
       { attackerLevel: 1, defenderLevel: 1, credits: 100, expectedScore: 100 },
       { attackerLevel: 1, defenderLevel: 2, credits: 150, expectedScore: 300 },
