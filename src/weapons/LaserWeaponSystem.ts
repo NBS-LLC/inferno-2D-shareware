@@ -1,3 +1,6 @@
+import { GameObjects } from "phaser";
+import { Ship } from "../game-objects/Ship";
+import { Ammo } from "./Ammo";
 import { Weapon } from "./Weapon";
 
 export class LaserWeaponSystem
@@ -7,8 +10,16 @@ export class LaserWeaponSystem
   private fireDelay = 1000 * 0.25;
   private nextFireAt = 0;
 
-  constructor(scene: Phaser.Scene) {
-    super(scene);
+  constructor(ship: Ship) {
+    super(ship.scene);
+
+    this.createMultipleCallback = (items) => {
+      items.forEach((gameObject) => {
+        if (gameObject instanceof LaserAmmo) {
+          gameObject.firedBy(ship);
+        }
+      });
+    };
 
     this.createMultiple({
       classType: LaserAmmo,
@@ -36,8 +47,9 @@ export class LaserWeaponSystem
   }
 }
 
-class LaserAmmo extends Phaser.GameObjects.Line {
+class LaserAmmo extends Phaser.GameObjects.Line implements Ammo {
   body: MatterJS.BodyType;
+  originator: GameObjects.GameObject;
 
   constructor(scene: Phaser.Scene) {
     super(
@@ -51,7 +63,7 @@ class LaserAmmo extends Phaser.GameObjects.Line {
       Phaser.Display.Color.GetColor(255, 255, 255),
     );
 
-    this.setName(LaserAmmo.name);
+    this.setName(this.constructor.name);
 
     this.setLineWidth(2, 1);
 
@@ -89,17 +101,23 @@ class LaserAmmo extends Phaser.GameObjects.Line {
   onCollision(pair: Phaser.Types.Physics.Matter.MatterCollisionPair) {
     const { bodyA, bodyB } = pair;
 
-    if (bodyA.gameObject instanceof LaserAmmo) {
-      bodyA.gameObject.hide();
-    } else {
-      bodyA.gameObject.destroy();
-    }
+    [bodyA.gameObject, bodyB.gameObject].forEach((gameObject) => {
+      if (gameObject instanceof LaserAmmo) {
+        gameObject.hide();
+      } else if (gameObject instanceof Ship) {
+        gameObject.kill(this.getFiredBy());
+      } else {
+        gameObject.destroy();
+      }
+    });
+  }
 
-    if (bodyB.gameObject instanceof LaserAmmo) {
-      bodyB.gameObject.hide();
-    } else {
-      bodyB.gameObject.destroy();
-    }
+  firedBy(gameObject: GameObjects.GameObject): void {
+    this.originator = gameObject;
+  }
+
+  getFiredBy() {
+    return this.originator;
   }
 
   private hide() {

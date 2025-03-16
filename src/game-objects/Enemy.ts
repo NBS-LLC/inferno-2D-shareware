@@ -1,6 +1,6 @@
-import { Scene } from "phaser";
+import { BaseScene } from "../scenes/BaseScene";
 import { LaserWeaponSystem } from "../weapons/LaserWeaponSystem";
-import { Ship } from "./Ship";
+import { Ship, ShipType } from "./Ship";
 
 export class Enemy extends Ship {
   private updateState: "disabled" | "idle" | "engage" = "disabled";
@@ -10,7 +10,7 @@ export class Enemy extends Ship {
   readonly originX: number;
   readonly originY: number;
 
-  constructor(scene: Scene, x: number, y: number) {
+  constructor(scene: BaseScene, x: number, y: number) {
     const vertices = [
       [0, 0],
       [40, 0],
@@ -24,7 +24,13 @@ export class Enemy extends Ship {
 
     this.setFillStyle(Phaser.Display.Color.GetColor(200, 110, 110));
 
-    this.attachPrimaryWeapon(new LaserWeaponSystem(this.scene));
+    this.attachPrimaryWeapon(new LaserWeaponSystem(this));
+
+    this.setWorth(100);
+  }
+
+  getType() {
+    return ShipType.Enemy;
   }
 
   idle() {

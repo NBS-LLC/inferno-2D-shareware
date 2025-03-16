@@ -1,9 +1,10 @@
-import { Scene } from "phaser";
 import { Enemy } from "../game-objects/Enemy";
 import { Player, PlayerInput } from "../game-objects/Player";
+import { BaseScene } from "./BaseScene";
 
-export class MainScene extends Scene {
+export class MainScene extends BaseScene {
   private debugging = false;
+  private scoreText: Phaser.GameObjects.Text;
   private fpsText: Phaser.GameObjects.Text;
   private pointerText: Phaser.GameObjects.Text;
 
@@ -51,18 +52,24 @@ export class MainScene extends Scene {
     this.enemy.idle();
     this.enemy.faceLeft();
 
-    this.fpsText = this.add.text(16, 32, "", {
+    this.scoreText = this.add.text(16, 16, "Score: 0", {
       fontSize: "16px",
       color: "#FFF",
     });
 
-    this.pointerText = this.add.text(16, 48, "", {
+    this.fpsText = this.add.text(16, 48, "", {
+      fontSize: "16px",
+      color: "#FFF",
+    });
+
+    this.pointerText = this.add.text(16, 64, "", {
       fontSize: "16px",
       color: "#FFF",
     });
   }
 
   update(time: number, delta: number) {
+    this.scoreText.setText(this.getScoreDetails());
     this.fpsText.setText(this.debugging ? this.getFPSDetails() : "");
     this.pointerText.setText(this.debugging ? this.getPointerDetails() : "");
 
@@ -73,10 +80,16 @@ export class MainScene extends Scene {
   private handleRestart() {
     this.debugging = false;
     this.scene.restart();
+    this.resetScore();
   }
 
   private getDayGradient(): number[] {
     return [0x0288d1, 0x288d1, 0xacf0f2, 0xacf0f2];
+  }
+
+  private getScoreDetails(): string {
+    const currentScore = this.getScorer().getScore();
+    return `Score: ${currentScore}`;
   }
 
   private getFPSDetails(): string {

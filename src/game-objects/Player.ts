@@ -1,6 +1,6 @@
-import { Scene } from "phaser";
+import { BaseScene } from "../scenes/BaseScene";
 import { LaserWeaponSystem } from "../weapons/LaserWeaponSystem";
-import { Ship } from "./Ship";
+import { Ship, ShipType } from "./Ship";
 
 export type PlayerInput = {
   [key: string]: Phaser.Input.Keyboard.Key;
@@ -8,7 +8,7 @@ export type PlayerInput = {
 
 export class Player extends Ship {
   constructor(
-    scene: Scene,
+    scene: BaseScene,
     x: number,
     y: number,
     private playerInput: PlayerInput,
@@ -23,7 +23,11 @@ export class Player extends Ship {
 
     this.setFillStyle(Phaser.Display.Color.GetColor(110, 110, 110));
 
-    this.attachPrimaryWeapon(new LaserWeaponSystem(this.scene));
+    this.attachPrimaryWeapon(new LaserWeaponSystem(this));
+  }
+
+  getType() {
+    return ShipType.Player;
   }
 
   update(_time: number, _delta: number): void {
