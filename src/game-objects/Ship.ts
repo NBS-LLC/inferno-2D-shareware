@@ -1,5 +1,6 @@
 import { BodyType } from "matter";
 import { GameObjects } from "phaser";
+import { Scorer } from "../logic/Scorer";
 import { BaseScene } from "../scenes/BaseScene";
 import { EmptyWeaponSystem } from "../weapons/EmptyWeaponSystem";
 import { Weapon } from "../weapons/Weapon";
@@ -10,7 +11,9 @@ export enum ShipType {
 }
 
 export abstract class Ship extends GameObjects.Polygon {
+  private level = 1;
   private speed = 5;
+  private credits = 0;
   private primaryWeapon: Weapon = new EmptyWeaponSystem();
 
   constructor(scene: BaseScene, x: number, y: number, vertices: number[][]) {
@@ -32,7 +35,13 @@ export abstract class Ship extends GameObjects.Polygon {
   kill(killer: GameObjects.GameObject) {
     console.log(this.name, "killed by", killer.name);
     if (killer instanceof Ship && killer.getType() === ShipType.Player) {
-      this.getScene().getScorer().addToScore(100);
+      const score = Scorer.calculateScore({
+        attackerLevel: killer.getLevel(),
+        defenderLevel: this.getLevel(),
+        credits: this.getCredits(),
+      });
+
+      this.getScene().getScorer().addToScore(score);
     }
     this.destroy();
   }
@@ -45,8 +54,24 @@ export abstract class Ship extends GameObjects.Polygon {
     return this.body as BodyType;
   }
 
+  getLevel() {
+    return this.level;
+  }
+
+  setLevel(value: number) {
+    this.level = Math.max(1, value);
+  }
+
   getSpeed() {
     return this.speed;
+  }
+
+  getCredits() {
+    return this.credits;
+  }
+
+  setCredits(value: number) {
+    this.credits = Math.max(0, value);
   }
 
   setSpeed(speed: number) {
@@ -90,7 +115,6 @@ export abstract class Ship extends GameObjects.Polygon {
   }
 
   firePrimaryWeapon() {
-    // BUG: when the ship is arbitrarily rotated (collision?), facing based firing breaks
     this.primaryWeapon.fire(
       this.isFacingLeft ? this.x - 20 : this.x + 20,
       this.y,
