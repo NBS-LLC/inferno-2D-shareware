@@ -13,7 +13,7 @@ export enum ShipType {
 export abstract class Ship extends GameObjects.Polygon {
   private level = 1;
   private speed = 5;
-  private credits = 0;
+  private worth = 0;
   private primaryWeapon: Weapon = new EmptyWeaponSystem();
 
   constructor(scene: BaseScene, x: number, y: number, vertices: number[][]) {
@@ -38,7 +38,7 @@ export abstract class Ship extends GameObjects.Polygon {
       const score = Scorer.calculateScore({
         attackerLevel: killer.getLevel(),
         defenderLevel: this.getLevel(),
-        credits: this.getCredits(),
+        worth: this.getWorth(),
       });
 
       this.getScene().getScorer().addToScore(score);
@@ -66,12 +66,12 @@ export abstract class Ship extends GameObjects.Polygon {
     return this.speed;
   }
 
-  getCredits() {
-    return this.credits;
+  getWorth() {
+    return this.worth;
   }
 
-  setCredits(value: number) {
-    this.credits = Math.max(0, value);
+  setWorth(value: number) {
+    this.worth = Math.max(0, value);
   }
 
   setSpeed(speed: number) {

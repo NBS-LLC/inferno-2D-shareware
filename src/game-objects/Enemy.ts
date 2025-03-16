@@ -26,7 +26,7 @@ export class Enemy extends Ship {
 
     this.attachPrimaryWeapon(new LaserWeaponSystem(this));
 
-    this.setCredits(100);
+    this.setWorth(100);
   }
 
   getType() {

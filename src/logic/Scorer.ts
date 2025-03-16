@@ -1,7 +1,7 @@
 interface Scorable {
   attackerLevel: number;
   defenderLevel: number;
-  credits: number;
+  worth: number;
 }
 
 export class Scorer {
@@ -10,8 +10,8 @@ export class Scorer {
   static calculateScore(stats: Scorable) {
     const defenderLevel = Math.max(1, Math.floor(stats.defenderLevel));
     const attackerLevel = Math.max(1, Math.floor(stats.attackerLevel));
-    const credits = Math.max(0, Math.floor(stats.credits));
-    return Math.ceil(credits * (defenderLevel / attackerLevel));
+    const worth = Math.max(0, Math.floor(stats.worth));
+    return Math.ceil(worth * (defenderLevel / attackerLevel));
   }
 
   addToScore(value: number) {
