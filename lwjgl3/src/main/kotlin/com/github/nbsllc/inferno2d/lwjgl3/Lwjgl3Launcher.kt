@@ -1,11 +1,11 @@
 @file:JvmName("Lwjgl3Launcher")
 
-package com.github.nbsllc.gdxperformance.lwjgl3
+package com.github.nbsllc.inferno2d.lwjgl3
 
 import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
-import com.github.nbsllc.gdxperformance.Main
+import com.github.nbsllc.inferno2d.Main
 
 /** Launches the desktop (LWJGL3) application. */
 fun main() {

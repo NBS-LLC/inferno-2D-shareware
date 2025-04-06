@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 //Note, the above license and copyright applies to this file only.
-package com.github.nbsllc.gdxperformance.lwjgl3
+package com.github.nbsllc.inferno2d.lwjgl3
 
 import org.lwjgl.system.macosx.LibC
 import java.io.BufferedReader

@@ -1,4 +1,4 @@
-package com.github.nbsllc.gdxperformance
+package com.github.nbsllc.inferno2d
 
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
