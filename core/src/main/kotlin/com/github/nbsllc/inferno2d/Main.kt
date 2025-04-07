@@ -36,6 +36,7 @@ class Main : ApplicationAdapter() {
         const val LASER_SPEED = 450f
         const val LASER_LIFETIME = 1.5f
         const val LASER_LENGTH = 20f
+        const val LASER_TAIL_OFFSET = 0.1f
         val SHIP_TIP_OFFSET_LOCAL = Vector2(15f, 0f)
     }
 
@@ -55,6 +56,9 @@ class Main : ApplicationAdapter() {
     private lateinit var playerBody: Body
 
     private lateinit var lasers: MutableList<Laser>
+    private val laserStartPos = Vector2()
+    private val laserEndPos = Vector2()
+    private val laserHitPoint = Vector2()
 
     override fun create() {
         val width = 1000f
@@ -164,17 +168,60 @@ class Main : ApplicationAdapter() {
         anomalyBody.angularVelocity = angularVelocityRad
     }
 
+    private val laserRayCastCallback = object : RayCastCallback {
+        var didHit: Boolean = false
+        var hitFixture: Fixture? = null
+        var closestFraction: Float = 1f
+
+        fun reset() {
+            didHit = false
+            hitFixture = null
+            closestFraction = 1f
+        }
+
+        override fun reportRayFixture(fixture: Fixture, point: Vector2, normal: Vector2, fraction: Float): Float {
+            if (fixture.body == anomalyBody) {
+                if (fraction < closestFraction) {
+                    didHit = true
+                    hitFixture = fixture
+                    laserHitPoint.set(point)
+                    closestFraction = fraction
+                }
+                return fraction
+            }
+            return -1f
+        }
+    }
+
+
     private fun updateLasers(deltaTime: Float) {
         val iterator = lasers.iterator()
         while (iterator.hasNext()) {
             val laser = iterator.next()
-            laser.position.mulAdd(laser.direction, laser.speed * deltaTime)
-            laser.lifetime -= deltaTime
-            if (laser.lifetime <= 0) {
+
+            laserStartPos.set(laser.position)
+            val distanceToTravel = laser.speed * deltaTime
+            laserEndPos.set(laserStartPos).mulAdd(laser.direction, distanceToTravel)
+
+            laserRayCastCallback.reset()
+            world.rayCast(laserRayCastCallback, laserStartPos, laserEndPos)
+
+            if (laserRayCastCallback.didHit) {
+                if (DEBUG) println("Laser hit anomaly!")
+
                 iterator.remove()
+                continue
+            } else {
+                laser.position.set(laserEndPos)
+
+                laser.lifetime -= deltaTime
+                if (laser.lifetime <= 0) {
+                    iterator.remove()
+                }
             }
         }
     }
+
 
     private fun stepWorld(deltaTime: Float) {
         val clampedDeltaTime = min(deltaTime, 0.25f)
@@ -206,7 +253,8 @@ class Main : ApplicationAdapter() {
         val tipOffsetWorld = SHIP_TIP_OFFSET_LOCAL.cpy().rotateRad(playerAngleRad)
         val shipTipPos = Vector2(playerPos).add(tipOffsetWorld)
 
-        val startPos = shipTipPos.cpy().mulAdd(direction, LASER_LENGTH)
+        val startOffset = LASER_LENGTH + LASER_TAIL_OFFSET
+        val startPos = shipTipPos.cpy().mulAdd(direction, startOffset)
 
         val newLaser = Laser(
             position = startPos,
