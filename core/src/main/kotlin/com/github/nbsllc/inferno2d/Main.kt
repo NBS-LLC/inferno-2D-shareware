@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.*
 import com.badlogic.gdx.utils.ScreenUtils
+import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import kotlin.math.min
@@ -28,16 +29,20 @@ data class Laser(
 class Main : ApplicationAdapter() {
     companion object {
         const val DEBUG = false
-        const val TIME_STEP = 1 / 60f
+        const val TARGET_FPS = 62
+        const val TARGET_FRAME_TIME_NANOS = 1_000_000_000L / TARGET_FPS
+        const val TIME_STEP = 1 / 120f
         const val VELOCITY_ITERATIONS = 6
         const val POSITION_ITERATIONS = 2
         const val ANOMALY_ROTATION_SPEED_DEG_PER_SEC = 90f
-        const val PLAYER_SPEED = 250f
+        const val PLAYER_SPEED = 150f
         const val LASER_SPEED = 450f
         const val LASER_LIFETIME = 1.5f
-        const val LASER_LENGTH = 20f
+        const val LASER_LENGTH = 15f
         const val LASER_TAIL_OFFSET = 0.1f
         val SHIP_TIP_OFFSET_LOCAL = Vector2(15f, 0f)
+
+        const val AVERAGE_INTERVAL = 1.0f
     }
 
     private lateinit var camera: OrthographicCamera
@@ -45,13 +50,13 @@ class Main : ApplicationAdapter() {
     private lateinit var shapeRenderer: ShapeRenderer
     private lateinit var batch: SpriteBatch
     private lateinit var font: BitmapFont
+
     private lateinit var world: World
     private lateinit var debugRenderer: Box2DDebugRenderer
     private var accumulator = 0f
 
     private lateinit var anomalyPolygon: Polygon
     private lateinit var playerPolygon: Polygon
-
     private lateinit var anomalyBody: Body
     private lateinit var playerBody: Body
 
@@ -60,13 +65,19 @@ class Main : ApplicationAdapter() {
     private val laserEndPos = Vector2()
     private val laserHitPoint = Vector2()
 
+    private var lastPlayerPos = Vector2()
+    private var distanceAccumulator = 0f
+    private var timeAccumulator = 0f
+    private var averageSpeed = 0f
+    private var isFirstSync = true
+
+    private var lastFrameStartTimeNanos: Long = 0
+
     override fun create() {
         val width = 1000f
         val height = 1000f
 
         camera = OrthographicCamera()
-        camera.setToOrtho(false, width, height)
-        camera.update()
         viewport = ExtendViewport(width, height, camera)
 
         shapeRenderer = ShapeRenderer()
@@ -80,6 +91,8 @@ class Main : ApplicationAdapter() {
 
         createAnomaly(width / 2f, height / 2f)
         createPlayer(width / 6f, height / 1.5f)
+
+        lastFrameStartTimeNanos = TimeUtils.nanoTime()
     }
 
     @Suppress("SameParameterValue")
@@ -143,7 +156,7 @@ class Main : ApplicationAdapter() {
         updateAnomaly()
         updateLasers(deltaTime)
         stepWorld(deltaTime)
-        syncVisuals()
+        syncVisuals(deltaTime)
     }
 
     private fun handleInput() {
@@ -193,7 +206,6 @@ class Main : ApplicationAdapter() {
         }
     }
 
-
     private fun updateLasers(deltaTime: Float) {
         val iterator = lasers.iterator()
         while (iterator.hasNext()) {
@@ -207,13 +219,10 @@ class Main : ApplicationAdapter() {
             world.rayCast(laserRayCastCallback, laserStartPos, laserEndPos)
 
             if (laserRayCastCallback.didHit) {
-                if (DEBUG) println("Laser hit anomaly!")
-
                 iterator.remove()
                 continue
             } else {
                 laser.position.set(laserEndPos)
-
                 laser.lifetime -= deltaTime
                 if (laser.lifetime <= 0) {
                     iterator.remove()
@@ -221,7 +230,6 @@ class Main : ApplicationAdapter() {
             }
         }
     }
-
 
     private fun stepWorld(deltaTime: Float) {
         val clampedDeltaTime = min(deltaTime, 0.25f)
@@ -232,7 +240,7 @@ class Main : ApplicationAdapter() {
         }
     }
 
-    private fun syncVisuals() {
+    private fun syncVisuals(deltaTime: Float) {
         val playerBodyPos = playerBody.position
         val playerBodyAngleDeg = playerBody.angle * MathUtils.radiansToDegrees
         playerPolygon.setPosition(playerBodyPos.x - playerPolygon.originX, playerBodyPos.y - playerPolygon.originY)
@@ -242,6 +250,24 @@ class Main : ApplicationAdapter() {
         val anomalyBodyAngleDeg = anomalyBody.angle * MathUtils.radiansToDegrees
         anomalyPolygon.setPosition(anomalyBodyPos.x - anomalyPolygon.originX, anomalyBodyPos.y - anomalyPolygon.originY)
         anomalyPolygon.rotation = anomalyBodyAngleDeg
+
+        if (deltaTime > 0) {
+            if (isFirstSync) {
+                lastPlayerPos.set(playerBodyPos)
+                isFirstSync = false
+            } else {
+                val distanceMoved = playerBodyPos.dst(lastPlayerPos)
+                distanceAccumulator += distanceMoved
+                timeAccumulator += deltaTime
+                lastPlayerPos.set(playerBodyPos)
+
+                if (timeAccumulator >= AVERAGE_INTERVAL) {
+                    averageSpeed = distanceAccumulator / timeAccumulator
+                    distanceAccumulator = 0f
+                    timeAccumulator = 0f
+                }
+            }
+        }
     }
 
     private fun fireLaser() {
@@ -268,18 +294,18 @@ class Main : ApplicationAdapter() {
     }
 
     override fun render() {
-        val deltaTime = Gdx.graphics.deltaTime
+        val frameStartTimeNanos = TimeUtils.nanoTime()
+        val actualDeltaTimeNanos = frameStartTimeNanos - lastFrameStartTimeNanos
+        val actualDeltaTimeSeconds = actualDeltaTimeNanos / 1_000_000_000.0f
+        lastFrameStartTimeNanos = frameStartTimeNanos
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit()
         }
 
-        update(deltaTime)
-
         ScreenUtils.clear(0f, 0f, 0f, 1f, true)
 
-        camera.update()
-        viewport.apply()
+        update(actualDeltaTimeSeconds)
 
         shapeRenderer.projectionMatrix = camera.combined
         batch.projectionMatrix = camera.combined
@@ -289,6 +315,19 @@ class Main : ApplicationAdapter() {
         renderLasers()
         renderDebug()
         renderUI()
+
+        val frameEndTimeNanos = TimeUtils.nanoTime()
+        val timeTakenNanos = frameEndTimeNanos - frameStartTimeNanos
+        val timeToSleepNanos = TARGET_FRAME_TIME_NANOS - timeTakenNanos
+
+        if (timeToSleepNanos > 0) {
+            try {
+                val sleepMillis = timeToSleepNanos / 1_000_000L
+                Thread.sleep(sleepMillis)
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+            }
+        }
     }
 
     private fun renderBackground() {
@@ -335,6 +374,7 @@ class Main : ApplicationAdapter() {
         batch.begin()
         font.draw(batch, "FPS: ${Gdx.graphics.framesPerSecond}", 10f, worldHeight - 10f)
         font.draw(batch, "Resolution: ${Gdx.graphics.width}x${Gdx.graphics.height}", 10f, worldHeight - 30f)
+        font.draw(batch, "Avg Speed: ${String.format("%.2f", averageSpeed)}", 10f, worldHeight - 50f)
         batch.end()
     }
 
