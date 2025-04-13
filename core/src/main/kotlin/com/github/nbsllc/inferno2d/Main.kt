@@ -291,12 +291,13 @@ class Main : ApplicationAdapter() {
             Gdx.app.exit()
         }
 
-        ScreenUtils.clear(0f, 0f, 0f, 1f, true)
-
         update(Gdx.graphics.deltaTime)
+        camera.update()
 
         shapeRenderer.projectionMatrix = camera.combined
         batch.projectionMatrix = camera.combined
+
+        ScreenUtils.clear(0f, 0f, 0f, 1f, true)
 
         renderBackground()
         renderGameObjects()
