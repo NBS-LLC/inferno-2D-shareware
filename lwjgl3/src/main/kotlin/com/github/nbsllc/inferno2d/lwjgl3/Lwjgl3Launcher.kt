@@ -27,6 +27,7 @@ fun main() {
     Lwjgl3Application(Main(), Lwjgl3ApplicationConfiguration().apply {
         setTitle("GDXPerformance")
         useVsync(false)
+        setForegroundFPS(60)
         if (selectedMode != null) {
             setFullscreenMode(selectedMode)
         } else {

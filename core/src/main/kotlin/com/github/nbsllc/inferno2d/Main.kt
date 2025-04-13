@@ -13,7 +13,6 @@ import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.*
 import com.badlogic.gdx.utils.ScreenUtils
-import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import kotlin.math.min
@@ -29,8 +28,6 @@ data class Laser(
 class Main : ApplicationAdapter() {
     companion object {
         const val DEBUG = false
-        const val TARGET_FPS = 62
-        const val TARGET_FRAME_TIME_NANOS = 1_000_000_000L / TARGET_FPS
         const val TIME_STEP = 1 / 120f
         const val VELOCITY_ITERATIONS = 6
         const val POSITION_ITERATIONS = 2
@@ -71,8 +68,6 @@ class Main : ApplicationAdapter() {
     private var averageSpeed = 0f
     private var isFirstSync = true
 
-    private var lastFrameStartTimeNanos: Long = 0
-
     override fun create() {
         val width = 1000f
         val height = 1000f
@@ -91,8 +86,6 @@ class Main : ApplicationAdapter() {
 
         createAnomaly(width / 2f, height / 2f)
         createPlayer(width / 6f, height / 1.5f)
-
-        lastFrameStartTimeNanos = TimeUtils.nanoTime()
     }
 
     @Suppress("SameParameterValue")
@@ -294,18 +287,13 @@ class Main : ApplicationAdapter() {
     }
 
     override fun render() {
-        val frameStartTimeNanos = TimeUtils.nanoTime()
-        val actualDeltaTimeNanos = frameStartTimeNanos - lastFrameStartTimeNanos
-        val actualDeltaTimeSeconds = actualDeltaTimeNanos / 1_000_000_000.0f
-        lastFrameStartTimeNanos = frameStartTimeNanos
-
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit()
         }
 
         ScreenUtils.clear(0f, 0f, 0f, 1f, true)
 
-        update(actualDeltaTimeSeconds)
+        update(Gdx.graphics.deltaTime)
 
         shapeRenderer.projectionMatrix = camera.combined
         batch.projectionMatrix = camera.combined
@@ -315,19 +303,6 @@ class Main : ApplicationAdapter() {
         renderLasers()
         renderDebug()
         renderUI()
-
-        val frameEndTimeNanos = TimeUtils.nanoTime()
-        val timeTakenNanos = frameEndTimeNanos - frameStartTimeNanos
-        val timeToSleepNanos = TARGET_FRAME_TIME_NANOS - timeTakenNanos
-
-        if (timeToSleepNanos > 0) {
-            try {
-                val sleepMillis = timeToSleepNanos / 1_000_000L
-                Thread.sleep(sleepMillis)
-            } catch (e: InterruptedException) {
-                Thread.currentThread().interrupt()
-            }
-        }
     }
 
     private fun renderBackground() {
