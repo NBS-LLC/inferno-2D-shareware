@@ -92,7 +92,6 @@ class Main : ApplicationAdapter() {
     private fun createPlayer(x: Float, y: Float) {
         playerPolygon = Polygon(floatArrayOf(0f, 0f, 30f, 10f, 0f, 20f))
         playerPolygon.setOrigin(15f, 10f)
-        playerPolygon.setPosition(x - 15f, y - 10f)
 
         val bodyDef = BodyDef()
         bodyDef.type = BodyDef.BodyType.DynamicBody
@@ -122,7 +121,6 @@ class Main : ApplicationAdapter() {
     private fun createAnomaly(x: Float, y: Float) {
         anomalyPolygon = Polygon(floatArrayOf(0f, 0f, 100f, 0f, 100f, 100f, 0f, 100f))
         anomalyPolygon.setOrigin(50f, 50f)
-        anomalyPolygon.setPosition(x - 50f, y - 50f)
 
         val bodyDef = BodyDef()
         bodyDef.type = BodyDef.BodyType.KinematicBody
