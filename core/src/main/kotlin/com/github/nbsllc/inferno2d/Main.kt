@@ -15,6 +15,7 @@ import com.badlogic.gdx.physics.box2d.*
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.github.nbsllc.inferno2d.actors.Player
 import kotlin.math.min
 
 data class Laser(
@@ -27,12 +28,11 @@ data class Laser(
 
 class Main : ApplicationAdapter() {
     companion object {
-        const val DEBUG = false
+        const val DEBUG = true
         const val TIME_STEP = 1 / 120f
         const val VELOCITY_ITERATIONS = 6
         const val POSITION_ITERATIONS = 2
         const val ANOMALY_ROTATION_SPEED_DEG_PER_SEC = 90f
-        const val PLAYER_SPEED = 150f
         const val LASER_SPEED = 450f
         const val LASER_LIFETIME = 1.5f
         const val LASER_LENGTH = 15f
@@ -52,10 +52,9 @@ class Main : ApplicationAdapter() {
     private lateinit var debugRenderer: Box2DDebugRenderer
     private var accumulator = 0f
 
+    private lateinit var player: Player
     private lateinit var anomalyPolygon: Polygon
-    private lateinit var playerPolygon: Polygon
     private lateinit var anomalyBody: Body
-    private lateinit var playerBody: Body
 
     private lateinit var lasers: MutableList<Laser>
     private val laserStartPos = Vector2()
@@ -85,36 +84,7 @@ class Main : ApplicationAdapter() {
         lasers = mutableListOf()
 
         createAnomaly(width / 2f, height / 2f)
-        createPlayer(width / 6f, height / 1.5f)
-    }
-
-    @Suppress("SameParameterValue")
-    private fun createPlayer(x: Float, y: Float) {
-        playerPolygon = Polygon(floatArrayOf(0f, 0f, 30f, 10f, 0f, 20f))
-        playerPolygon.setOrigin(15f, 10f)
-
-        val bodyDef = BodyDef()
-        bodyDef.type = BodyDef.BodyType.DynamicBody
-        bodyDef.position.set(x, y)
-        bodyDef.angularDamping = 1.0f
-        bodyDef.linearDamping = 2.5f
-
-        playerBody = world.createBody(bodyDef)
-        playerBody.userData = playerPolygon
-
-        val shape = PolygonShape()
-        val vertices = floatArrayOf(-15f, -10f, 15f, 0f, -15f, 10f)
-        shape.set(vertices)
-
-        val fixtureDef = FixtureDef()
-        fixtureDef.shape = shape
-        fixtureDef.density = 1.0f
-        fixtureDef.friction = 0.5f
-        fixtureDef.restitution = 0.3f
-
-        playerBody.createFixture(fixtureDef)
-
-        shape.dispose()
+        player = Player(width / 6f, height / 1.5f, world)
     }
 
     @Suppress("SameParameterValue")
@@ -143,28 +113,11 @@ class Main : ApplicationAdapter() {
     }
 
     private fun update(deltaTime: Float) {
-        handleInput()
+        player.update()
         updateAnomaly()
         updateLasers(deltaTime)
         stepWorld(deltaTime)
         syncVisuals(deltaTime)
-    }
-
-    private fun handleInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            fireLaser()
-        }
-
-        val targetVelocity = Vector2()
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) targetVelocity.x = -1f
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) targetVelocity.x = 1f
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) targetVelocity.y = 1f
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) targetVelocity.y = -1f
-
-        if (!targetVelocity.isZero) {
-            targetVelocity.nor().scl(PLAYER_SPEED)
-            playerBody.linearVelocity = targetVelocity
-        }
     }
 
     private fun updateAnomaly() {
@@ -227,15 +180,12 @@ class Main : ApplicationAdapter() {
     }
 
     private fun syncVisuals(deltaTime: Float) {
-        val playerBodyPos = playerBody.position
-        val playerBodyAngleDeg = playerBody.angle * MathUtils.radiansToDegrees
-        playerPolygon.setPosition(playerBodyPos.x - playerPolygon.originX, playerBodyPos.y - playerPolygon.originY)
-        playerPolygon.rotation = playerBodyAngleDeg
-
         val anomalyBodyPos = anomalyBody.position
         val anomalyBodyAngleDeg = anomalyBody.angle * MathUtils.radiansToDegrees
         anomalyPolygon.setPosition(anomalyBodyPos.x - anomalyPolygon.originX, anomalyBodyPos.y - anomalyPolygon.originY)
         anomalyPolygon.rotation = anomalyBodyAngleDeg
+
+        val playerBodyPos = player.getBody().position
 
         if (deltaTime > 0) {
             if (isFirstSync) {
@@ -257,8 +207,8 @@ class Main : ApplicationAdapter() {
     }
 
     private fun fireLaser() {
-        val playerAngleRad = playerBody.angle
-        val playerPos = playerBody.position
+        val playerAngleRad = player.getBody().angle
+        val playerPos = player.getBody().position
 
         val direction = Vector2(1f, 0f).rotateRad(playerAngleRad).nor()
 
@@ -293,6 +243,7 @@ class Main : ApplicationAdapter() {
         ScreenUtils.clear(0f, 0f, 0f, 1f, true)
 
         renderBackground()
+        player.render(shapeRenderer)
         renderGameObjects()
         renderLasers()
         renderDebug()
@@ -316,8 +267,6 @@ class Main : ApplicationAdapter() {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
         shapeRenderer.color = Color.GRAY
         shapeRenderer.polygon(anomalyPolygon.transformedVertices)
-        shapeRenderer.color = Color.GRAY
-        shapeRenderer.polygon(playerPolygon.transformedVertices)
         shapeRenderer.end()
     }
 
