@@ -175,23 +175,18 @@ class Main : ApplicationAdapter() {
     private val laserRayCastCallback = object : RayCastCallback {
         var didHit: Boolean = false
         var hitFixture: Fixture? = null
-        var closestFraction: Float = 1f
 
         fun reset() {
             didHit = false
             hitFixture = null
-            closestFraction = 1f
         }
 
         override fun reportRayFixture(fixture: Fixture, point: Vector2, normal: Vector2, fraction: Float): Float {
             if (fixture.body == anomalyBody) {
-                if (fraction < closestFraction) {
-                    didHit = true
-                    hitFixture = fixture
-                    laserHitPoint.set(point)
-                    closestFraction = fraction
-                }
-                return fraction
+                didHit = true
+                hitFixture = fixture
+                laserHitPoint.set(point)
+                return 0f
             }
             return -1f
         }
