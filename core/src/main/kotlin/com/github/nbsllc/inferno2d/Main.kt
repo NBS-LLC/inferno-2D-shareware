@@ -185,6 +185,7 @@ class Main : ApplicationAdapter() {
         anomalyPolygon.setPosition(anomalyBodyPos.x - anomalyPolygon.originX, anomalyBodyPos.y - anomalyPolygon.originY)
         anomalyPolygon.rotation = anomalyBodyAngleDeg
 
+        player.syncVisuals()
         val playerBodyPos = player.getBody().position
 
         if (deltaTime > 0) {
