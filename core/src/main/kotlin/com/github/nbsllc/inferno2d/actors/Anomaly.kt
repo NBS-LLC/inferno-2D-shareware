@@ -1,54 +1,44 @@
 package com.github.nbsllc.inferno2d.actors
 
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Polygon
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.*
 
-class Player(x: Float, y: Float, world: World) {
+class Anomaly(x: Float, y: Float, world: World) {
     companion object {
-        const val PLAYER_SPEED = 150f
+        const val ROTATION_SPEED = 90f
     }
 
     private val polygon = Polygon(
         floatArrayOf(
             0f, 0f,
-            30f, 10f,
-            0f, 20f
+            100f, 0f,
+            100f, 100f,
+            0f, 100f
         )
     )
 
     private val body: Body
 
     init {
-        polygon.setOrigin(15f, 10f)
+        polygon.setOrigin(50f, 50f)
 
         val bodyDef = BodyDef()
-        bodyDef.type = BodyDef.BodyType.DynamicBody
+        bodyDef.type = BodyDef.BodyType.KinematicBody
         bodyDef.position.set(x, y)
-        bodyDef.angularDamping = 1.0f
-        bodyDef.linearDamping = 2.5f
 
         body = world.createBody(bodyDef)
         body.userData = polygon
 
         val shape = PolygonShape()
-        val vertices = floatArrayOf(
-            -15f, -10f,
-            15f, 0f,
-            -15f, 10f
-        )
-        shape.set(vertices)
+        shape.setAsBox(50f, 50f)
 
         val fixtureDef = FixtureDef()
         fixtureDef.shape = shape
-        fixtureDef.density = 1.0f
-        fixtureDef.friction = 0.5f
-        fixtureDef.restitution = 0.3f
+        fixtureDef.friction = 0.4f
+        fixtureDef.restitution = 0.1f
 
         body.createFixture(fixtureDef)
 
@@ -60,20 +50,7 @@ class Player(x: Float, y: Float, world: World) {
     }
 
     fun update() {
-//        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-//            fireLaser()
-//        }
-
-        val targetVelocity = Vector2()
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) targetVelocity.x = -1f
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) targetVelocity.x = 1f
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) targetVelocity.y = 1f
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) targetVelocity.y = -1f
-
-        if (!targetVelocity.isZero) {
-            targetVelocity.nor().scl(PLAYER_SPEED)
-            body.linearVelocity = targetVelocity
-        }
+        body.angularVelocity = ROTATION_SPEED * MathUtils.degreesToRadians
     }
 
     fun render(shapeRenderer: ShapeRenderer) {

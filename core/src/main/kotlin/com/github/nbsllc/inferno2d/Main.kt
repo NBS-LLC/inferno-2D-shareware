@@ -8,13 +8,15 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.MathUtils
-import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.*
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
+import com.badlogic.gdx.physics.box2d.Fixture
+import com.badlogic.gdx.physics.box2d.RayCastCallback
+import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.github.nbsllc.inferno2d.actors.Anomaly
 import com.github.nbsllc.inferno2d.actors.Player
 import kotlin.math.min
 
@@ -32,7 +34,6 @@ class Main : ApplicationAdapter() {
         const val TIME_STEP = 1 / 120f
         const val VELOCITY_ITERATIONS = 6
         const val POSITION_ITERATIONS = 2
-        const val ANOMALY_ROTATION_SPEED_DEG_PER_SEC = 90f
         const val LASER_SPEED = 450f
         const val LASER_LIFETIME = 1.5f
         const val LASER_LENGTH = 15f
@@ -52,9 +53,8 @@ class Main : ApplicationAdapter() {
     private lateinit var debugRenderer: Box2DDebugRenderer
     private var accumulator = 0f
 
+    private lateinit var anomaly: Anomaly
     private lateinit var player: Player
-    private lateinit var anomalyPolygon: Polygon
-    private lateinit var anomalyBody: Body
 
     private lateinit var lasers: MutableList<Laser>
     private val laserStartPos = Vector2()
@@ -83,46 +83,16 @@ class Main : ApplicationAdapter() {
 
         lasers = mutableListOf()
 
-        createAnomaly(width / 2f, height / 2f)
+        anomaly = Anomaly(width / 2f, height / 2f, world)
         player = Player(width / 6f, height / 1.5f, world)
-    }
-
-    @Suppress("SameParameterValue")
-    private fun createAnomaly(x: Float, y: Float) {
-        anomalyPolygon = Polygon(floatArrayOf(0f, 0f, 100f, 0f, 100f, 100f, 0f, 100f))
-        anomalyPolygon.setOrigin(50f, 50f)
-
-        val bodyDef = BodyDef()
-        bodyDef.type = BodyDef.BodyType.KinematicBody
-        bodyDef.position.set(x, y)
-
-        anomalyBody = world.createBody(bodyDef)
-        anomalyBody.userData = anomalyPolygon
-
-        val shape = PolygonShape()
-        shape.setAsBox(50f, 50f)
-
-        val fixtureDef = FixtureDef()
-        fixtureDef.shape = shape
-        fixtureDef.friction = 0.4f
-        fixtureDef.restitution = 0.1f
-
-        anomalyBody.createFixture(fixtureDef)
-
-        shape.dispose()
     }
 
     private fun update(deltaTime: Float) {
         player.update()
-        updateAnomaly()
+        anomaly.update()
         updateLasers(deltaTime)
         stepWorld(deltaTime)
         syncVisuals(deltaTime)
-    }
-
-    private fun updateAnomaly() {
-        val angularVelocityRad = ANOMALY_ROTATION_SPEED_DEG_PER_SEC * MathUtils.degreesToRadians
-        anomalyBody.angularVelocity = angularVelocityRad
     }
 
     private val laserRayCastCallback = object : RayCastCallback {
@@ -135,7 +105,7 @@ class Main : ApplicationAdapter() {
         }
 
         override fun reportRayFixture(fixture: Fixture, point: Vector2, normal: Vector2, fraction: Float): Float {
-            if (fixture.body == anomalyBody) {
+            if (fixture.body == anomaly.getBody()) {
                 didHit = true
                 hitFixture = fixture
                 laserHitPoint.set(point)
@@ -180,12 +150,9 @@ class Main : ApplicationAdapter() {
     }
 
     private fun syncVisuals(deltaTime: Float) {
-        val anomalyBodyPos = anomalyBody.position
-        val anomalyBodyAngleDeg = anomalyBody.angle * MathUtils.radiansToDegrees
-        anomalyPolygon.setPosition(anomalyBodyPos.x - anomalyPolygon.originX, anomalyBodyPos.y - anomalyPolygon.originY)
-        anomalyPolygon.rotation = anomalyBodyAngleDeg
-
         player.syncVisuals()
+        anomaly.syncVisuals()
+
         val playerBodyPos = player.getBody().position
 
         if (deltaTime > 0) {
@@ -245,7 +212,7 @@ class Main : ApplicationAdapter() {
 
         renderBackground()
         player.render(shapeRenderer)
-        renderGameObjects()
+        anomaly.render(shapeRenderer)
         renderLasers()
         renderDebug()
         renderUI()
@@ -261,13 +228,6 @@ class Main : ApplicationAdapter() {
             shapeRenderer.color = color
             shapeRenderer.rect(0f, y.toFloat(), worldWidth, 1f)
         }
-        shapeRenderer.end()
-    }
-
-    private fun renderGameObjects() {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
-        shapeRenderer.color = Color.GRAY
-        shapeRenderer.polygon(anomalyPolygon.transformedVertices)
         shapeRenderer.end()
     }
 
