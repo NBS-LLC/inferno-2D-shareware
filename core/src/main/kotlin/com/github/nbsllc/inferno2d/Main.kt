@@ -28,15 +28,18 @@ data class Laser(
 class Main : ApplicationAdapter() {
     companion object {
         const val DEBUG = false
-        const val TIME_STEP = 1 / 60f
+        const val TIME_STEP = 1 / 120f
         const val VELOCITY_ITERATIONS = 6
         const val POSITION_ITERATIONS = 2
         const val ANOMALY_ROTATION_SPEED_DEG_PER_SEC = 90f
-        const val PLAYER_SPEED = 250f
+        const val PLAYER_SPEED = 150f
         const val LASER_SPEED = 450f
         const val LASER_LIFETIME = 1.5f
-        const val LASER_LENGTH = 20f
+        const val LASER_LENGTH = 15f
+        const val LASER_TAIL_OFFSET = 0.1f
         val SHIP_TIP_OFFSET_LOCAL = Vector2(15f, 0f)
+
+        const val AVERAGE_INTERVAL = 1.0f
     }
 
     private lateinit var camera: OrthographicCamera
@@ -44,25 +47,32 @@ class Main : ApplicationAdapter() {
     private lateinit var shapeRenderer: ShapeRenderer
     private lateinit var batch: SpriteBatch
     private lateinit var font: BitmapFont
+
     private lateinit var world: World
     private lateinit var debugRenderer: Box2DDebugRenderer
     private var accumulator = 0f
 
     private lateinit var anomalyPolygon: Polygon
     private lateinit var playerPolygon: Polygon
-
     private lateinit var anomalyBody: Body
     private lateinit var playerBody: Body
 
     private lateinit var lasers: MutableList<Laser>
+    private val laserStartPos = Vector2()
+    private val laserEndPos = Vector2()
+    private val laserHitPoint = Vector2()
+
+    private var lastPlayerPos = Vector2()
+    private var distanceAccumulator = 0f
+    private var timeAccumulator = 0f
+    private var averageSpeed = 0f
+    private var isFirstSync = true
 
     override fun create() {
         val width = 1000f
         val height = 1000f
 
         camera = OrthographicCamera()
-        camera.setToOrtho(false, width, height)
-        camera.update()
         viewport = ExtendViewport(width, height, camera)
 
         shapeRenderer = ShapeRenderer()
@@ -82,7 +92,6 @@ class Main : ApplicationAdapter() {
     private fun createPlayer(x: Float, y: Float) {
         playerPolygon = Polygon(floatArrayOf(0f, 0f, 30f, 10f, 0f, 20f))
         playerPolygon.setOrigin(15f, 10f)
-        playerPolygon.setPosition(x - 15f, y - 10f)
 
         val bodyDef = BodyDef()
         bodyDef.type = BodyDef.BodyType.DynamicBody
@@ -112,7 +121,6 @@ class Main : ApplicationAdapter() {
     private fun createAnomaly(x: Float, y: Float) {
         anomalyPolygon = Polygon(floatArrayOf(0f, 0f, 100f, 0f, 100f, 100f, 0f, 100f))
         anomalyPolygon.setOrigin(50f, 50f)
-        anomalyPolygon.setPosition(x - 50f, y - 50f)
 
         val bodyDef = BodyDef()
         bodyDef.type = BodyDef.BodyType.KinematicBody
@@ -139,7 +147,7 @@ class Main : ApplicationAdapter() {
         updateAnomaly()
         updateLasers(deltaTime)
         stepWorld(deltaTime)
-        syncVisuals()
+        syncVisuals(deltaTime)
     }
 
     private fun handleInput() {
@@ -164,14 +172,47 @@ class Main : ApplicationAdapter() {
         anomalyBody.angularVelocity = angularVelocityRad
     }
 
+    private val laserRayCastCallback = object : RayCastCallback {
+        var didHit: Boolean = false
+        var hitFixture: Fixture? = null
+
+        fun reset() {
+            didHit = false
+            hitFixture = null
+        }
+
+        override fun reportRayFixture(fixture: Fixture, point: Vector2, normal: Vector2, fraction: Float): Float {
+            if (fixture.body == anomalyBody) {
+                didHit = true
+                hitFixture = fixture
+                laserHitPoint.set(point)
+                return 0f
+            }
+            return -1f
+        }
+    }
+
     private fun updateLasers(deltaTime: Float) {
         val iterator = lasers.iterator()
         while (iterator.hasNext()) {
             val laser = iterator.next()
-            laser.position.mulAdd(laser.direction, laser.speed * deltaTime)
-            laser.lifetime -= deltaTime
-            if (laser.lifetime <= 0) {
+
+            laserStartPos.set(laser.position)
+            val distanceToTravel = laser.speed * deltaTime
+            laserEndPos.set(laserStartPos).mulAdd(laser.direction, distanceToTravel)
+
+            laserRayCastCallback.reset()
+            world.rayCast(laserRayCastCallback, laserStartPos, laserEndPos)
+
+            if (laserRayCastCallback.didHit) {
                 iterator.remove()
+                continue
+            } else {
+                laser.position.set(laserEndPos)
+                laser.lifetime -= deltaTime
+                if (laser.lifetime <= 0) {
+                    iterator.remove()
+                }
             }
         }
     }
@@ -185,7 +226,7 @@ class Main : ApplicationAdapter() {
         }
     }
 
-    private fun syncVisuals() {
+    private fun syncVisuals(deltaTime: Float) {
         val playerBodyPos = playerBody.position
         val playerBodyAngleDeg = playerBody.angle * MathUtils.radiansToDegrees
         playerPolygon.setPosition(playerBodyPos.x - playerPolygon.originX, playerBodyPos.y - playerPolygon.originY)
@@ -195,6 +236,24 @@ class Main : ApplicationAdapter() {
         val anomalyBodyAngleDeg = anomalyBody.angle * MathUtils.radiansToDegrees
         anomalyPolygon.setPosition(anomalyBodyPos.x - anomalyPolygon.originX, anomalyBodyPos.y - anomalyPolygon.originY)
         anomalyPolygon.rotation = anomalyBodyAngleDeg
+
+        if (deltaTime > 0) {
+            if (isFirstSync) {
+                lastPlayerPos.set(playerBodyPos)
+                isFirstSync = false
+            } else {
+                val distanceMoved = playerBodyPos.dst(lastPlayerPos)
+                distanceAccumulator += distanceMoved
+                timeAccumulator += deltaTime
+                lastPlayerPos.set(playerBodyPos)
+
+                if (timeAccumulator >= AVERAGE_INTERVAL) {
+                    averageSpeed = distanceAccumulator / timeAccumulator
+                    distanceAccumulator = 0f
+                    timeAccumulator = 0f
+                }
+            }
+        }
     }
 
     private fun fireLaser() {
@@ -206,7 +265,8 @@ class Main : ApplicationAdapter() {
         val tipOffsetWorld = SHIP_TIP_OFFSET_LOCAL.cpy().rotateRad(playerAngleRad)
         val shipTipPos = Vector2(playerPos).add(tipOffsetWorld)
 
-        val startPos = shipTipPos.cpy().mulAdd(direction, LASER_LENGTH)
+        val startOffset = LASER_LENGTH + LASER_TAIL_OFFSET
+        val startPos = shipTipPos.cpy().mulAdd(direction, startOffset)
 
         val newLaser = Laser(
             position = startPos,
@@ -220,21 +280,17 @@ class Main : ApplicationAdapter() {
     }
 
     override fun render() {
-        val deltaTime = Gdx.graphics.deltaTime
-
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit()
         }
 
-        update(deltaTime)
-
-        ScreenUtils.clear(0f, 0f, 0f, 1f, true)
-
+        update(Gdx.graphics.deltaTime)
         camera.update()
-        viewport.apply()
 
         shapeRenderer.projectionMatrix = camera.combined
         batch.projectionMatrix = camera.combined
+
+        ScreenUtils.clear(0f, 0f, 0f, 1f, true)
 
         renderBackground()
         renderGameObjects()
@@ -287,6 +343,7 @@ class Main : ApplicationAdapter() {
         batch.begin()
         font.draw(batch, "FPS: ${Gdx.graphics.framesPerSecond}", 10f, worldHeight - 10f)
         font.draw(batch, "Resolution: ${Gdx.graphics.width}x${Gdx.graphics.height}", 10f, worldHeight - 30f)
+        font.draw(batch, "Avg Speed: ${String.format("%.2f", averageSpeed)}", 10f, worldHeight - 50f)
         batch.end()
     }
 
