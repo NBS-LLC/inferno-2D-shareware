@@ -20,26 +20,12 @@ import com.github.nbsllc.inferno2d.actors.Anomaly
 import com.github.nbsllc.inferno2d.actors.Player
 import kotlin.math.min
 
-data class Laser(
-    val position: Vector2,
-    val direction: Vector2,
-    var lifetime: Float,
-    val speed: Float,
-    val length: Float
-)
-
 class Main : ApplicationAdapter() {
     companion object {
         const val DEBUG = true
         const val TIME_STEP = 1 / 120f
         const val VELOCITY_ITERATIONS = 6
         const val POSITION_ITERATIONS = 2
-        const val LASER_SPEED = 450f
-        const val LASER_LIFETIME = 1.5f
-        const val LASER_LENGTH = 15f
-        const val LASER_TAIL_OFFSET = 0.1f
-        val SHIP_TIP_OFFSET_LOCAL = Vector2(15f, 0f)
-
         const val AVERAGE_INTERVAL = 1.0f
     }
 
@@ -55,11 +41,6 @@ class Main : ApplicationAdapter() {
 
     private lateinit var anomaly: Anomaly
     private lateinit var player: Player
-
-    private lateinit var lasers: MutableList<Laser>
-    private val laserStartPos = Vector2()
-    private val laserEndPos = Vector2()
-    private val laserHitPoint = Vector2()
 
     private var lastPlayerPos = Vector2()
     private var distanceAccumulator = 0f
@@ -81,16 +62,13 @@ class Main : ApplicationAdapter() {
         world = World(Vector2(0f, 0f), true)
         debugRenderer = Box2DDebugRenderer()
 
-        lasers = mutableListOf()
-
         anomaly = Anomaly(width / 2f, height / 2f, world)
         player = Player(width / 6f, height / 1.5f, world)
     }
 
     private fun update(deltaTime: Float) {
-        player.update()
+        player.update(deltaTime)
         anomaly.update()
-        updateLasers(deltaTime)
         stepWorld(deltaTime)
         syncVisuals(deltaTime)
     }
@@ -108,35 +86,9 @@ class Main : ApplicationAdapter() {
             if (fixture.body == anomaly.getBody()) {
                 didHit = true
                 hitFixture = fixture
-                laserHitPoint.set(point)
                 return 0f
             }
             return -1f
-        }
-    }
-
-    private fun updateLasers(deltaTime: Float) {
-        val iterator = lasers.iterator()
-        while (iterator.hasNext()) {
-            val laser = iterator.next()
-
-            laserStartPos.set(laser.position)
-            val distanceToTravel = laser.speed * deltaTime
-            laserEndPos.set(laserStartPos).mulAdd(laser.direction, distanceToTravel)
-
-            laserRayCastCallback.reset()
-            world.rayCast(laserRayCastCallback, laserStartPos, laserEndPos)
-
-            if (laserRayCastCallback.didHit) {
-                iterator.remove()
-                continue
-            } else {
-                laser.position.set(laserEndPos)
-                laser.lifetime -= deltaTime
-                if (laser.lifetime <= 0) {
-                    iterator.remove()
-                }
-            }
         }
     }
 
@@ -174,29 +126,6 @@ class Main : ApplicationAdapter() {
         }
     }
 
-    private fun fireLaser() {
-        val playerAngleRad = player.getBody().angle
-        val playerPos = player.getBody().position
-
-        val direction = Vector2(1f, 0f).rotateRad(playerAngleRad).nor()
-
-        val tipOffsetWorld = SHIP_TIP_OFFSET_LOCAL.cpy().rotateRad(playerAngleRad)
-        val shipTipPos = Vector2(playerPos).add(tipOffsetWorld)
-
-        val startOffset = LASER_LENGTH + LASER_TAIL_OFFSET
-        val startPos = shipTipPos.cpy().mulAdd(direction, startOffset)
-
-        val newLaser = Laser(
-            position = startPos,
-            direction = direction,
-            lifetime = LASER_LIFETIME,
-            speed = LASER_SPEED,
-            length = LASER_LENGTH
-        )
-
-        lasers.add(newLaser)
-    }
-
     override fun render() {
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit()
@@ -213,7 +142,6 @@ class Main : ApplicationAdapter() {
         renderBackground()
         player.render(shapeRenderer)
         anomaly.render(shapeRenderer)
-        renderLasers()
         renderDebug()
         renderUI()
     }
@@ -227,17 +155,6 @@ class Main : ApplicationAdapter() {
             val color = Color(0.1f * ratio, 0.3f * ratio, 0.5f * ratio, 1f)
             shapeRenderer.color = color
             shapeRenderer.rect(0f, y.toFloat(), worldWidth, 1f)
-        }
-        shapeRenderer.end()
-    }
-
-    private fun renderLasers() {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
-        shapeRenderer.color = Color.WHITE
-        val tailPos = Vector2()
-        for (laser in lasers) {
-            tailPos.set(laser.position).mulAdd(laser.direction, -laser.length)
-            shapeRenderer.line(tailPos.x, tailPos.y, laser.position.x, laser.position.y)
         }
         shapeRenderer.end()
     }
