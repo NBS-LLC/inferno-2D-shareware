@@ -121,6 +121,6 @@ class Player(x: Float, y: Float, world: World) {
         val startOffset = Laser.LENGTH + LASER_TAIL_OFFSET
         val startPos = shipTipPos.cpy().mulAdd(direction, startOffset)
 
-        lasers.add(Laser(startPos, direction))
+        lasers.add(Laser(startPos, direction, body.world))
     }
 }
