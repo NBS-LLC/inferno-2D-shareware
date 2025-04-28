@@ -8,37 +8,22 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.MathUtils
-import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.*
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
+import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.github.nbsllc.inferno2d.actors.Anomaly
+import com.github.nbsllc.inferno2d.actors.Player
 import kotlin.math.min
-
-data class Laser(
-    val position: Vector2,
-    val direction: Vector2,
-    var lifetime: Float,
-    val speed: Float,
-    val length: Float
-)
 
 class Main : ApplicationAdapter() {
     companion object {
-        const val DEBUG = false
+        const val DEBUG = true
         const val TIME_STEP = 1 / 120f
         const val VELOCITY_ITERATIONS = 6
         const val POSITION_ITERATIONS = 2
-        const val ANOMALY_ROTATION_SPEED_DEG_PER_SEC = 90f
-        const val PLAYER_SPEED = 150f
-        const val LASER_SPEED = 450f
-        const val LASER_LIFETIME = 1.5f
-        const val LASER_LENGTH = 15f
-        const val LASER_TAIL_OFFSET = 0.1f
-        val SHIP_TIP_OFFSET_LOCAL = Vector2(15f, 0f)
-
         const val AVERAGE_INTERVAL = 1.0f
     }
 
@@ -52,15 +37,8 @@ class Main : ApplicationAdapter() {
     private lateinit var debugRenderer: Box2DDebugRenderer
     private var accumulator = 0f
 
-    private lateinit var anomalyPolygon: Polygon
-    private lateinit var playerPolygon: Polygon
-    private lateinit var anomalyBody: Body
-    private lateinit var playerBody: Body
-
-    private lateinit var lasers: MutableList<Laser>
-    private val laserStartPos = Vector2()
-    private val laserEndPos = Vector2()
-    private val laserHitPoint = Vector2()
+    private lateinit var anomaly: Anomaly
+    private lateinit var player: Player
 
     private var lastPlayerPos = Vector2()
     private var distanceAccumulator = 0f
@@ -82,139 +60,15 @@ class Main : ApplicationAdapter() {
         world = World(Vector2(0f, 0f), true)
         debugRenderer = Box2DDebugRenderer()
 
-        lasers = mutableListOf()
-
-        createAnomaly(width / 2f, height / 2f)
-        createPlayer(width / 6f, height / 1.5f)
-    }
-
-    @Suppress("SameParameterValue")
-    private fun createPlayer(x: Float, y: Float) {
-        playerPolygon = Polygon(floatArrayOf(0f, 0f, 30f, 10f, 0f, 20f))
-        playerPolygon.setOrigin(15f, 10f)
-
-        val bodyDef = BodyDef()
-        bodyDef.type = BodyDef.BodyType.DynamicBody
-        bodyDef.position.set(x, y)
-        bodyDef.angularDamping = 1.0f
-        bodyDef.linearDamping = 2.5f
-
-        playerBody = world.createBody(bodyDef)
-        playerBody.userData = playerPolygon
-
-        val shape = PolygonShape()
-        val vertices = floatArrayOf(-15f, -10f, 15f, 0f, -15f, 10f)
-        shape.set(vertices)
-
-        val fixtureDef = FixtureDef()
-        fixtureDef.shape = shape
-        fixtureDef.density = 1.0f
-        fixtureDef.friction = 0.5f
-        fixtureDef.restitution = 0.3f
-
-        playerBody.createFixture(fixtureDef)
-
-        shape.dispose()
-    }
-
-    @Suppress("SameParameterValue")
-    private fun createAnomaly(x: Float, y: Float) {
-        anomalyPolygon = Polygon(floatArrayOf(0f, 0f, 100f, 0f, 100f, 100f, 0f, 100f))
-        anomalyPolygon.setOrigin(50f, 50f)
-
-        val bodyDef = BodyDef()
-        bodyDef.type = BodyDef.BodyType.KinematicBody
-        bodyDef.position.set(x, y)
-
-        anomalyBody = world.createBody(bodyDef)
-        anomalyBody.userData = anomalyPolygon
-
-        val shape = PolygonShape()
-        shape.setAsBox(50f, 50f)
-
-        val fixtureDef = FixtureDef()
-        fixtureDef.shape = shape
-        fixtureDef.friction = 0.4f
-        fixtureDef.restitution = 0.1f
-
-        anomalyBody.createFixture(fixtureDef)
-
-        shape.dispose()
+        anomaly = Anomaly(width / 2f, height / 2f, world)
+        player = Player(width / 6f, height / 1.5f, world)
     }
 
     private fun update(deltaTime: Float) {
-        handleInput()
-        updateAnomaly()
-        updateLasers(deltaTime)
+        player.update(deltaTime)
+        anomaly.update()
         stepWorld(deltaTime)
         syncVisuals(deltaTime)
-    }
-
-    private fun handleInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            fireLaser()
-        }
-
-        val targetVelocity = Vector2()
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) targetVelocity.x = -1f
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) targetVelocity.x = 1f
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) targetVelocity.y = 1f
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) targetVelocity.y = -1f
-
-        if (!targetVelocity.isZero) {
-            targetVelocity.nor().scl(PLAYER_SPEED)
-            playerBody.linearVelocity = targetVelocity
-        }
-    }
-
-    private fun updateAnomaly() {
-        val angularVelocityRad = ANOMALY_ROTATION_SPEED_DEG_PER_SEC * MathUtils.degreesToRadians
-        anomalyBody.angularVelocity = angularVelocityRad
-    }
-
-    private val laserRayCastCallback = object : RayCastCallback {
-        var didHit: Boolean = false
-        var hitFixture: Fixture? = null
-
-        fun reset() {
-            didHit = false
-            hitFixture = null
-        }
-
-        override fun reportRayFixture(fixture: Fixture, point: Vector2, normal: Vector2, fraction: Float): Float {
-            if (fixture.body == anomalyBody) {
-                didHit = true
-                hitFixture = fixture
-                laserHitPoint.set(point)
-                return 0f
-            }
-            return -1f
-        }
-    }
-
-    private fun updateLasers(deltaTime: Float) {
-        val iterator = lasers.iterator()
-        while (iterator.hasNext()) {
-            val laser = iterator.next()
-
-            laserStartPos.set(laser.position)
-            val distanceToTravel = laser.speed * deltaTime
-            laserEndPos.set(laserStartPos).mulAdd(laser.direction, distanceToTravel)
-
-            laserRayCastCallback.reset()
-            world.rayCast(laserRayCastCallback, laserStartPos, laserEndPos)
-
-            if (laserRayCastCallback.didHit) {
-                iterator.remove()
-                continue
-            } else {
-                laser.position.set(laserEndPos)
-                laser.lifetime -= deltaTime
-                if (laser.lifetime <= 0) {
-                    iterator.remove()
-                }
-            }
-        }
     }
 
     private fun stepWorld(deltaTime: Float) {
@@ -227,15 +81,10 @@ class Main : ApplicationAdapter() {
     }
 
     private fun syncVisuals(deltaTime: Float) {
-        val playerBodyPos = playerBody.position
-        val playerBodyAngleDeg = playerBody.angle * MathUtils.radiansToDegrees
-        playerPolygon.setPosition(playerBodyPos.x - playerPolygon.originX, playerBodyPos.y - playerPolygon.originY)
-        playerPolygon.rotation = playerBodyAngleDeg
+        player.syncVisuals()
+        anomaly.syncVisuals()
 
-        val anomalyBodyPos = anomalyBody.position
-        val anomalyBodyAngleDeg = anomalyBody.angle * MathUtils.radiansToDegrees
-        anomalyPolygon.setPosition(anomalyBodyPos.x - anomalyPolygon.originX, anomalyBodyPos.y - anomalyPolygon.originY)
-        anomalyPolygon.rotation = anomalyBodyAngleDeg
+        val playerBodyPos = player.getBody().position
 
         if (deltaTime > 0) {
             if (isFirstSync) {
@@ -256,29 +105,6 @@ class Main : ApplicationAdapter() {
         }
     }
 
-    private fun fireLaser() {
-        val playerAngleRad = playerBody.angle
-        val playerPos = playerBody.position
-
-        val direction = Vector2(1f, 0f).rotateRad(playerAngleRad).nor()
-
-        val tipOffsetWorld = SHIP_TIP_OFFSET_LOCAL.cpy().rotateRad(playerAngleRad)
-        val shipTipPos = Vector2(playerPos).add(tipOffsetWorld)
-
-        val startOffset = LASER_LENGTH + LASER_TAIL_OFFSET
-        val startPos = shipTipPos.cpy().mulAdd(direction, startOffset)
-
-        val newLaser = Laser(
-            position = startPos,
-            direction = direction,
-            lifetime = LASER_LIFETIME,
-            speed = LASER_SPEED,
-            length = LASER_LENGTH
-        )
-
-        lasers.add(newLaser)
-    }
-
     override fun render() {
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit()
@@ -293,8 +119,8 @@ class Main : ApplicationAdapter() {
         ScreenUtils.clear(0f, 0f, 0f, 1f, true)
 
         renderBackground()
-        renderGameObjects()
-        renderLasers()
+        player.render(shapeRenderer)
+        anomaly.render(shapeRenderer)
         renderDebug()
         renderUI()
     }
@@ -308,26 +134,6 @@ class Main : ApplicationAdapter() {
             val color = Color(0.1f * ratio, 0.3f * ratio, 0.5f * ratio, 1f)
             shapeRenderer.color = color
             shapeRenderer.rect(0f, y.toFloat(), worldWidth, 1f)
-        }
-        shapeRenderer.end()
-    }
-
-    private fun renderGameObjects() {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
-        shapeRenderer.color = Color.GRAY
-        shapeRenderer.polygon(anomalyPolygon.transformedVertices)
-        shapeRenderer.color = Color.GRAY
-        shapeRenderer.polygon(playerPolygon.transformedVertices)
-        shapeRenderer.end()
-    }
-
-    private fun renderLasers() {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
-        shapeRenderer.color = Color.WHITE
-        val tailPos = Vector2()
-        for (laser in lasers) {
-            tailPos.set(laser.position).mulAdd(laser.direction, -laser.length)
-            shapeRenderer.line(tailPos.x, tailPos.y, laser.position.x, laser.position.y)
         }
         shapeRenderer.end()
     }
