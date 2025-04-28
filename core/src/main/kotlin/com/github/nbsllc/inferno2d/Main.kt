@@ -10,8 +10,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
-import com.badlogic.gdx.physics.box2d.Fixture
-import com.badlogic.gdx.physics.box2d.RayCastCallback
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -71,25 +69,6 @@ class Main : ApplicationAdapter() {
         anomaly.update()
         stepWorld(deltaTime)
         syncVisuals(deltaTime)
-    }
-
-    private val laserRayCastCallback = object : RayCastCallback {
-        var didHit: Boolean = false
-        var hitFixture: Fixture? = null
-
-        fun reset() {
-            didHit = false
-            hitFixture = null
-        }
-
-        override fun reportRayFixture(fixture: Fixture, point: Vector2, normal: Vector2, fraction: Float): Float {
-            if (fixture.body == anomaly.getBody()) {
-                didHit = true
-                hitFixture = fixture
-                return 0f
-            }
-            return -1f
-        }
     }
 
     private fun stepWorld(deltaTime: Float) {
